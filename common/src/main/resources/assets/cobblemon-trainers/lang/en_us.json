@@ -162,28 +162,27 @@
   "trainer.cobblemon-trainers.theazertor.lose": "You need a soul! (Too easy)",
 
   "trainer.cobblemon-trainers.octavien29.name": "Octavien29",
-  "trainer.cobblemon-trainers.octavien29.battle_start": "!",
-  "trainer.cobblemon-trainers.octavien29.win": ".....",
-  "trainer.cobblemon-trainers.octavien29.lose": "WIN !!!!",
+  "trainer.cobblemon-trainers.octavien29.battle_start": "Hold on tight, this is going to blow up!",
+  "trainer.cobblemon-trainers.octavien29.win": "I have to admit, you're not bad.",
+  "trainer.cobblemon-trainers.octavien29.lose": "Ez, even if you're not that bad!",
 
   "trainer.cobblemon-trainers.kagumi.name": "Kagumi",
-  "trainer.cobblemon-trainers.kagumi.battle_start": "!",
+  "trainer.cobblemon-trainers.kagumi.battle_start": "Let's fight!",
   "trainer.cobblemon-trainers.kagumi.win": ".....",
-  "trainer.cobblemon-trainers.kagumi.lose": "WIN !!!!",
+  "trainer.cobblemon-trainers.kagumi.lose": "You need to train a bit more!",
 
   "trainer.cobblemon-trainers.griff501.name": "Griff501",
-  "trainer.cobblemon-trainers.griff501.battle_start": "!",
-  "trainer.cobblemon-trainers.griff501.win": ".....",
-  "trainer.cobblemon-trainers.griff501.lose": "WIN !!!!",
+  "trainer.cobblemon-trainers.griff501.battle_start": "You have no chance against me.",
+  "trainer.cobblemon-trainers.griff501.win": "You got lucky this time.",
+  "trainer.cobblemon-trainers.griff501.lose": "I overestimated you.",
 
   "trainer.cobblemon-trainers.aeliothys.name": "Aeliothys",
-  "trainer.cobblemon-trainers.aeliothys.battle_start": "!",
-  "trainer.cobblemon-trainers.aeliothys.win": ".....",
-  "trainer.cobblemon-trainers.aeliothys.lose": "WIN !!!!",
+  "trainer.cobblemon-trainers.aeliothys.battle_start": "The stars foretold your arrival. Let's see if they were right!",
+  "trainer.cobblemon-trainers.aeliothys.win": "Fate has decided otherwise... this time.",
+  "trainer.cobblemon-trainers.aeliothys.lose": "Just as predicted! The stars never lie!",
 
   "trainer.cobblemon-trainers.mr-azertor.name": "Mr. Azertor",
-  "trainer.cobblemon-trainers.mr-azertor.battle_start": "!",
-  "trainer.cobblemon-trainers.mr-azertor.win": ".....",
-  "trainer.cobblemon-trainers.mr-azertor.lose": "WIN !!!!",
-  "trainer.cobblemon-trainers.mr-azertor.locked": "You are not ready for this one yet."
+  "trainer.cobblemon-trainers.mr-azertor.battle_start": "Get ready, I'm going to make you bite the dust!",
+  "trainer.cobblemon-trainers.mr-azertor.win": "Unfortunately, I didn't manage to win.",
+  "trainer.cobblemon-trainers.mr-azertor.lose": "GG!"
 }
