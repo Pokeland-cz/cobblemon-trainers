@@ -152,8 +152,8 @@
 
   "trainer.cobblemon-trainers.ultra-rerebleue.name": "Ultra-RereBleue",
   "trainer.cobblemon-trainers.ultra-rerebleue.battle_start": "Me demande pas pourquoi j'ai un E dans mon nom. Combattons plutôt !",
-  "trainer.cobblemon-trainers.ultra-rerebleue.win": "Trop facile 😎",
-  "trainer.cobblemon-trainers.ultra-rerebleue.lose": "Pas mal ! tu t'es bien débrouillé.",
+  "trainer.cobblemon-trainers.ultra-rerebleue.win": "Pas mal ! tu t'es bien débrouillé. ",
+  "trainer.cobblemon-trainers.ultra-rerebleue.lose": "Trop facile \uD83D\uDE0E",
   "trainer.cobblemon-trainers.ultra-rerebleue.locked": "Tu n'es pas encore prêt pour celui-là.",
 
   "trainer.cobblemon-trainers.theazertor.name": "TheAzertor",
@@ -162,28 +162,27 @@
   "trainer.cobblemon-trainers.theazertor.lose": "Il vous faut une âme ! (Trop simple)",
 
   "trainer.cobblemon-trainers.octavien29.name": "Octavien29",
-  "trainer.cobblemon-trainers.octavien29.battle_start": "!",
-  "trainer.cobblemon-trainers.octavien29.win": ".....",
-  "trainer.cobblemon-trainers.octavien29.lose": "WIN !!!!",
+  "trainer.cobblemon-trainers.octavien29.battle_start": "Accroche-toi, car ça va péter !",
+  "trainer.cobblemon-trainers.octavien29.win": "Je dois admettre que tu n'es pas mauvais.",
+  "trainer.cobblemon-trainers.octavien29.lose": "Ez, même si tu n'es pas si mauvais que ça !",
 
   "trainer.cobblemon-trainers.kagumi.name": "Kagumi",
-  "trainer.cobblemon-trainers.kagumi.battle_start": "!",
+  "trainer.cobblemon-trainers.kagumi.battle_start": "Battons-nous !",
   "trainer.cobblemon-trainers.kagumi.win": ".....",
-  "trainer.cobblemon-trainers.kagumi.lose": "WIN !!!!",
+  "trainer.cobblemon-trainers.kagumi.lose": "Tu dois t'entraîner un peu plus !",
 
   "trainer.cobblemon-trainers.griff501.name": "Griff501",
-  "trainer.cobblemon-trainers.griff501.battle_start": "!",
-  "trainer.cobblemon-trainers.griff501.win": ".....",
-  "trainer.cobblemon-trainers.griff501.lose": "WIN !!!!",
+  "trainer.cobblemon-trainers.griff501.battle_start": "Tu n'as aucune chance contre moi.",
+  "trainer.cobblemon-trainers.griff501.win": "Tu as eu de la chance, cette fois.",
+  "trainer.cobblemon-trainers.griff501.lose": "Je t'ai surestimé.",
 
   "trainer.cobblemon-trainers.aeliothys.name": "Aeliothys",
-  "trainer.cobblemon-trainers.aeliothys.battle_start": "!",
-  "trainer.cobblemon-trainers.aeliothys.win": ".....",
-  "trainer.cobblemon-trainers.aeliothys.lose": "WIN !!!!",
+  "trainer.cobblemon-trainers.aeliothys.battle_start": "Les étoiles m'ont prédit ta venue. Voyons si elles avaient raison !",
+  "trainer.cobblemon-trainers.aeliothys.win": "Le destin en a décidé autrement... pour cette fois.",
+  "trainer.cobblemon-trainers.aeliothys.lose": "Comme prévu ! Les étoiles ne mentent jamais !",
 
   "trainer.cobblemon-trainers.mr-azertor.name": "Mr. Azertor",
-  "trainer.cobblemon-trainers.mr-azertor.battle_start": "!",
-  "trainer.cobblemon-trainers.mr-azertor.win": ".....",
-  "trainer.cobblemon-trainers.mr-azertor.lose": "WIN !!!!"
-
+  "trainer.cobblemon-trainers.mr-azertor.battle_start": "Prépare-toi, je vais te faire mordre la poussière !",
+  "trainer.cobblemon-trainers.mr-azertor.win": "Je n'ai malheureusement pas atteint la victoire.",
+  "trainer.cobblemon-trainers.mr-azertor.lose": "GG !"
 }
