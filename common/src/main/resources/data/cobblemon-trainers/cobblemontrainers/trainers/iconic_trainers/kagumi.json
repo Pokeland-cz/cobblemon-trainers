@@ -2,12 +2,13 @@
   "name": "trainer.cobblemon-trainers.kagumi.name",
   "skin": {
     "type": "player_uuid",
-    "value": "a39a97bf-b69d-440c-a689-140e5e5e3922"
+    "value": "a39a97bf-b69d-440c-a689-140e5e5e3922",
+    "model": "slim"
   },
   "battle": {
     "level": 80,
     "difficulty": 5,
-    "music": "cobblemon-trainers:battle_music.corvault",
+    "music": "cobblemon-trainers:battle_music.jacinthe",
     "intro": "bw",
     "gimmicks": [
       "mega"

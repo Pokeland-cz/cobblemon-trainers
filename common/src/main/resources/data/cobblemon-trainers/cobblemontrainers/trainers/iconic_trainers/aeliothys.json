@@ -3,7 +3,7 @@
   "skin": {
     "type": "texture",
     "value": "cobblemon-trainers:textures/trainers/aeliothys.png",
-    "model": "default"
+    "model": "slim"
   },
   "battle": {
     "level": 80,
