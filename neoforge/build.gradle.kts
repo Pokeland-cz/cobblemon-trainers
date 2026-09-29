@@ -60,7 +60,7 @@ publishMods {
     file = providers.gradleProperty("release_file")
         .map { rootProject.layout.projectDirectory.file(it) }
         .orElse(tasks.jar.flatMap { it.archiveFile })
-    displayName = "Cobblemon Trainers $modVersion (NeoForge)"
+    displayName = "$modVersion-neoforge"
     version = "$modVersion-neoforge"
     type = when (providers.gradleProperty("release_type").getOrElse("stable").lowercase()) {
         "alpha" -> ReleaseType.ALPHA

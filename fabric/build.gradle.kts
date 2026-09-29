@@ -96,13 +96,13 @@ dependencies {
 	// The same archive again, unremapped, for [cobblemonLibs] below.
 	cobblemonArchive("maven.modrinth:cobblemon:${project.property("cobblemon_version")}")
 
-    // Mega Showdown and what it needs, dropped into `run/mods` for the dev game. See the
-    // `devMods` configuration above. Architectury is one of them rather than a compile
-    // dependency: Cobblemon 1.8 neither compiles nor runs against it - only Mega Showdown does.
-    devMods("maven.modrinth:cobblemon-mega-showdown:${project.property("mega_showdown_version")}")
-    devMods("maven.modrinth:accessories:${project.property("accessories_version")}")
-    devMods("maven.modrinth:owo-lib:${project.property("owo_version")}")
-    devMods("maven.modrinth:architectury-api:${project.property("architectury_version")}")
+	// Mega Showdown and what it needs, dropped into `run/mods` for the dev game. See the
+	// `devMods` configuration above. Architectury is one of them rather than a compile
+	// dependency: Cobblemon 1.8 neither compiles nor runs against it - only Mega Showdown does.
+	devMods("maven.modrinth:cobblemon-mega-showdown:${project.property("mega_showdown_version")}")
+	devMods("maven.modrinth:accessories:${project.property("accessories_version")}")
+	devMods("maven.modrinth:owo-lib:${project.property("owo_version")}")
+	devMods("maven.modrinth:architectury-api:${project.property("architectury_version")}")
 }
 
 /**
@@ -282,7 +282,7 @@ publishMods {
 	file = providers.gradleProperty("release_file")
 		.map { rootProject.layout.projectDirectory.file(it) }
 		.orElse(tasks.named<RemapJarTask>("remapJar").flatMap { it.archiveFile })
-	displayName = "Cobblemon Trainers $modVersion"
+	displayName = "$modVersion-fabric"
 	version = modVersion
 	type = releaseType
 	modLoaders.add("fabric")
