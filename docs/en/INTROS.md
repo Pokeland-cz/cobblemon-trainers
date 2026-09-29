@@ -76,7 +76,7 @@ These fields apply to every type.
 | `for` | `12` | How many ticks that entrance lasts |
 | `from` | `fade` | `left`, `right`, `top`, `bottom`, `fade`, `pop`, `none` |
 | `ease` | `out` | `out` (arrives slowing down), `in`, `linear` |
-| `alpha` | `1` | Its opacity once it has landed |
+| `alpha` | `1` | Its opacity once it has landed, including 3D models |
 | `sound` | - | A sound played **once**, on tick `at` |
 | `volume` / `pitch` | `1` / `1` | For that sound |
 
@@ -272,9 +272,7 @@ corner at any size. `offset` goes from there.
 Everything is counted in ticks, 20 a second, from the moment the screen goes up.
 
 - `at` is when a layer starts coming in, `for` how long that takes.
-- **The exit is shared**: `fadeOut` takes the whole screen away at once. A flat layer fades
-  out with it; a `figure` and a `pokemon` leave **by moving**, back out the way they came in
-  or shrinking on the spot, a model being unable to fade. Nothing to write for that.
+- **The exit is shared**: `fadeOut` fades every layer, including 3D models.
 - The player may skip **once the last entrance has landed** - the largest `at + for` of all the
   layers. Before that nothing answers: a held key repeats, and nobody should skip a screen they
   have not seen.

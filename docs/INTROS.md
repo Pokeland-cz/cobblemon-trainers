@@ -76,7 +76,7 @@ Ces champs valent pour tous les types.
 | `for` | `12` | Combien de ticks elle dure |
 | `from` | `fade` | `left`, `right`, `top`, `bottom`, `fade`, `pop`, `none` |
 | `ease` | `out` | `out` (arrive en ralentissant), `in`, `linear` |
-| `alpha` | `1` | Son opacité une fois posé |
+| `alpha` | `1` | Son opacité une fois posé, modèles 3D compris |
 | `sound` | - | Un son joué **une fois**, au tick `at` |
 | `volume` / `pitch` | `1` / `1` | Pour ce son |
 
@@ -275,9 +275,7 @@ L'ancre tombe sur les **vrais** bords de la fenêtre, sans mise à l'échelle : 
 Tout se compte en ticks, 20 par seconde, depuis le lever de l'écran.
 
 - `at` est le moment où un calque commence à entrer, `for` la durée de cette entrée.
-- La **sortie est commune** : `fadeOut` emmène tout l'écran d'un coup. Un calque plat s'y
-  fond ; une figure et un `pokemon` s'en vont **en bougeant**, par où ils sont entrés ou en
-  rétrécissant sur place, un modèle ne pouvant pas se fondre. Rien à écrire pour ça.
+- La **sortie est commune** : `fadeOut` fond tous les calques, modèles 3D compris.
 - Le joueur peut passer l'écran **une fois la dernière entrée finie** - le plus grand
   `at + for` de tous les calques. Avant, rien ne répond : une touche maintenue se répète, et
   personne ne doit sauter un écran qu'il n'a pas vu.

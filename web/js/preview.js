@@ -498,18 +498,6 @@ const Preview = (() => {
 
       if (alpha <= 0) return;
 
-      // A model blends nothing in game, so a figure leaves by going rather than by fading.
-      if (!layout && (layer.type === 'figure' || layer.type === 'pokemon')) {
-        switch (layer.from) {
-          case 'left': x = lerp(-reach, x, leaving); break;
-          case 'right': x = lerp(WIDTH + reach, x, leaving); break;
-          case 'top': y = lerp(-reach, y, leaving); break;
-          case 'bottom': y = lerp(HEIGHT + reach, y, leaving); break;
-          default: scale *= leaving;
-        }
-        if (scale <= 0) return;
-      }
-
       const [w, h] = extent(ctx, layer, about);
       boxes[index] = { index, x, y, w: w * scale, h: h * scale };
       draw[layer.type](ctx, layer, x, y, scale, Math.min(alpha, 1), about);

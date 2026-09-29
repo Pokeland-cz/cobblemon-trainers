@@ -61,12 +61,8 @@ import org.joml.Vector3f
  * - **The entity is posed, then put back.** `renderEntityInInventory` draws whatever rotation
  *   the entity carries, so the yaw a layer asks for is written onto it for the length of one
  *   call - the name tag included, which would otherwise float in the middle of the screen.
- * - **The whole screen leaves at once, but not all of it by fading.** What a layer is made of
- *   decides whether the fade reaches it: a fill or a text takes it, an image only once blending
- *   is turned back on around its blit, an item only through the shader colour, and a posed
- *   model not at all - entity render types blend nothing, so a figure leaves by going instead.
- *   Left alone, each of those stands at full strength until the screen cuts out, which is the
- *   whole of issue #47.
+ * - **Model opacity is applied after rendering.** Cutout materials ignore shader alpha,
+ *   so [IntroModelOpacity] blends the completed figure with its background.
  * - **Skipping only starts once the last entrance has landed.** A held key repeats, so a player
  *   walking up to a trainer with a finger on their movement key would otherwise skip the screen
  *   on the very frame it opened.
@@ -114,6 +110,8 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     /** What one reference pixel is worth on this window. */
     private var uiScale = 1f
 
+    private val modelOpacity = IntroModelOpacity()
+
     override fun init() {
         uiScale = minOf(
             width.toFloat() / TrainerIntro.REFERENCE_WIDTH,
@@ -141,7 +139,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         val fadeIn = scene.fadeIn.coerceAtLeast(1).toFloat()
         val fadeOut = scene.fadeOut.coerceAtLeast(1).toFloat()
         // How much of the screen is left: 1 until the fade-out starts, 0 as it ends. It is the
-        // fade itself for everything that takes a colour, and the way out for what does not.
+        // shared fade, including models composited by IntroModelOpacity.
         val leaving = 1f - eased((elapsed - (ticks - fadeOut)) / fadeOut)
         val alpha = eased(elapsed / fadeIn) * leaving
         if (alpha <= 0f) return
@@ -151,7 +149,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
             if (elapsed < layer.at) return@forEachIndexed
 
             playSound(index, layer, elapsed)
-            drawLayer(guiGraphics, index, layer, entrance, alpha, leaving, partialTick)
+            drawLayer(guiGraphics, index, layer, entrance, alpha, partialTick)
         }
 
         if (elapsed >= skipAt) {
@@ -180,8 +178,6 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
 
     /**
      * One layer, where its entrance has got it to and under what is left of the screen.
-     *
-     * @param leaving What the fade-out has left, 1 until it starts and 0 as it ends.
      */
     private fun drawLayer(
         guiGraphics: GuiGraphics,
@@ -189,7 +185,6 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         layer: IntroLayer,
         entrance: Float,
         screenAlpha: Float,
-        leaving: Float,
         partialTick: Float
     ) {
         val restX = anchorX(layer.anchor) + layer.offsetX * uiScale
@@ -217,29 +212,18 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
 
         if (alpha <= 0f) return
 
-        // A model is drawn on an entity render type, which blends nothing: the screen's fade
-        // never reaches it, and it would still be standing at full strength once the scene
-        // around it had gone. So it leaves by moving - back out the way it came in, or
-        // shrinking away when it came in on the spot - which no render type can ignore.
-        if (layer.type == IntroLayer.FIGURE || layer.type == IntroLayer.POKEMON) {
-            when (layer.from) {
-                "left" -> x = lerp(-span, x, leaving)
-                "right" -> x = lerp(width + span, x, leaving)
-                "top" -> y = lerp(-span, y, leaving)
-                "bottom" -> y = lerp(height + span, y, leaving)
-                else -> scale *= leaving
-            }
-            if (scale <= 0f) return
-        }
-
         when (layer.type) {
             IntroLayer.FILL -> fill(guiGraphics, layer, x, y, scale, alpha)
-            IntroLayer.FIGURE -> figure(guiGraphics, layer, x, y, scale, alpha)
+            IntroLayer.FIGURE -> modelOpacity.draw(guiGraphics, alpha) {
+                figure(guiGraphics, layer, x, y, scale, 1f)
+            }
             IntroLayer.TEXT -> text(guiGraphics, layer, x, y, scale, alpha)
             IntroLayer.VS -> versus(guiGraphics, layer, x, y, scale, alpha)
             IntroLayer.IMAGE -> image(guiGraphics, layer, x, y, scale, alpha)
             IntroLayer.TEAM_BALLS -> teamBalls(guiGraphics, layer, x, y, scale, alpha)
-            IntroLayer.POKEMON -> pokemon(guiGraphics, index, layer, x, y, scale, alpha, partialTick)
+            IntroLayer.POKEMON -> modelOpacity.draw(guiGraphics, alpha) {
+                pokemon(guiGraphics, index, layer, x, y, scale, 1f, partialTick)
+            }
         }
     }
 
@@ -552,6 +536,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     override fun removed() {
         quietened?.hideNameTag = quietenedWas
         quietened = null
+        modelOpacity.close()
         super.removed()
     }
 
