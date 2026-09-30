@@ -157,9 +157,10 @@
   "trainer.cobblemon-trainers.ultra-rerebleue.locked": "Tu n'es pas encore prêt pour celui-là.",
 
   "trainer.cobblemon-trainers.theazertor.name": "TheAzertor",
-  "trainer.cobblemon-trainers.theazertor.battle_start": "Il vous faut une âme !",
-  "trainer.cobblemon-trainers.theazertor.win": "Il vous faut une âme ! (Pas mal)",
-  "trainer.cobblemon-trainers.theazertor.lose": "Il vous faut une âme ! (Trop simple)",
+  "trainer.cobblemon-trainers.theazertor.greeting": "Hey, envie de combattre l'ancien Champion d'Alola ?",
+  "trainer.cobblemon-trainers.theazertor.battle_start": "Ça fait longtemps que je n'ai pas combattu avec ces Pokémon... On va tout donner !",
+  "trainer.cobblemon-trainers.theazertor.win": "Woah, vous êtes vraiment fort ! On DOIT se battre à nouveau un jour !",
+  "trainer.cobblemon-trainers.theazertor.lose": "Vous avez fait de votre mieux, mais on dirait qu'on a encore quelques tours dans notre sac. Réessaies un jour !",
 
   "trainer.cobblemon-trainers.octavien29.name": "Octavien29",
   "trainer.cobblemon-trainers.octavien29.battle_start": "Accroche-toi, car ça va péter !",
