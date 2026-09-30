@@ -14,6 +14,7 @@
     ]
   },
   "messages": {
+    "greeting": "trainer.cobblemon-trainers.theazertor.greeting",
     "start": "trainer.cobblemon-trainers.theazertor.battle_start",
     "win": "trainer.cobblemon-trainers.theazertor.win",
     "lose": "trainer.cobblemon-trainers.theazertor.lose"

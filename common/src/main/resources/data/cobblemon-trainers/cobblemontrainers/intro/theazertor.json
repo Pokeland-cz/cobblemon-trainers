@@ -17,8 +17,8 @@
       "width": 320,
       "height": 122,
       "offset": [
-        -159,
-        120
+        -160,
+        119
       ],
       "from": "bottom"
     },
@@ -41,7 +41,7 @@
       "at": 50,
       "for": 15,
       "offset": [
-        155,
+        208,
         -35
       ],
       "height": 195,
@@ -54,7 +54,7 @@
       "at": 40,
       "for": 15,
       "offset": [
-        155,
+        208,
         -35
       ],
       "height": 195,
@@ -67,7 +67,7 @@
       "at": 19,
       "for": 15,
       "offset": [
-        -154,
+        -207,
         36
       ],
       "height": 195,
@@ -81,7 +81,7 @@
       "at": 10,
       "for": 15,
       "offset": [
-        -154,
+        -207,
         36
       ],
       "height": 195,
@@ -108,7 +108,7 @@
     },
     {
       "type": "fill",
-      "alpha": 0.2,
+      "alpha": 0.4,
       "sound": "cobblemon-trainers:battle_music.lysandre"
     }
   ]
