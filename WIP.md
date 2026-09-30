@@ -4,6 +4,7 @@ BATTLE INTRO :
 - Commande pour tester les intros (Idée de Coco)
 - Pouvoir choisir une coordonnée Z pour le dresseur (Idée de Coco)
 - Revoir la logique de placement des pokémon sur l'intro
+- Corriger les fins d'intro qui ont des images qui clignotent et des sons qui ne se jouent pasct
 
 WEB BATTLE INTRO :
 - Fix le bug qui fait qu'une intro est hors champ quand notre timeur est en fin d'animation
