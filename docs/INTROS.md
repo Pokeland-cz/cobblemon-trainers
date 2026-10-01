@@ -293,6 +293,9 @@ C'est un son d'interface : il suit le curseur **Principal**, pas celui de la mus
 déjà le thème de combat. Comme la musique, il est nommé par sa clé de `sounds.json` et vit donc
 sous `assets/`.
 
+Tous les sons de l'intro s'arrêtent dès que l'écran se ferme, y compris si on passe l'intro
+ou si le son est une longue musique. Le thème de combat continue normalement.
+
 ## L'exemple complet
 
 `bw`, l'intro livrée avec le mod, est écrite dans ce format et dans aucun autre - c'est le
