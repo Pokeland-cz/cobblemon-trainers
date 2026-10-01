@@ -290,6 +290,9 @@ It is a UI sound: it follows the **Master** slider rather than the music one, wh
 carries the battle theme. Like the music, it is named by its `sounds.json` key and therefore
 lives under `assets/`.
 
+All intro sounds stop as soon as the screen closes, including when the intro is skipped
+or the sound is a long music track. The battle theme continues normally.
+
 ## The full example
 
 `bw`, the intro the mod ships, is written in this format and in no other - which makes it the

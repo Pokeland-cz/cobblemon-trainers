@@ -87,6 +87,9 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     /** One flag per layer: a sound is a moment, not a state. */
     private val soundsPlayed = BooleanArray(scene.layers.size)
 
+    /** Keep the instances so even long tracks stop when this screen leaves. */
+    private val introSounds = mutableListOf<SoundInstance>()
+
     /** Whether the log has already been told that a figure had no model to pose. */
     private var flatWarned = false
 
@@ -532,8 +535,10 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         return entity
     }
 
-    /** Gives the trainer their name back, whichever way the screen went away. */
+    /** Releases the intro's sounds and visuals, whichever way the screen went away. */
     override fun removed() {
+        introSounds.forEach { minecraft?.soundManager?.stop(it) }
+        introSounds.clear()
         quietened?.hideNameTag = quietenedWas
         quietened = null
         modelOpacity.close()
@@ -612,22 +617,23 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         soundsPlayed[index] = true
         val location = layer.sound?.takeIf { it.isNotBlank() }?.let { ResourceLocation.tryParse(it) } ?: return
 
-        minecraft?.soundManager?.play(
-            SimpleSoundInstance(
-                location,
-                SoundSource.MASTER,
-                layer.volume,
-                layer.pitch,
-                SoundInstance.createUnseededRandom(),
-                false,
-                0,
-                SoundInstance.Attenuation.NONE,
-                0.0,
-                0.0,
-                0.0,
-                true
-            )
+        val soundManager = minecraft?.soundManager ?: return
+        val sound = SimpleSoundInstance(
+            location,
+            SoundSource.MASTER,
+            layer.volume,
+            layer.pitch,
+            SoundInstance.createUnseededRandom(),
+            false,
+            0,
+            SoundInstance.Attenuation.NONE,
+            0.0,
+            0.0,
+            0.0,
+            true
         )
+        introSounds.add(sound)
+        soundManager.play(sound)
     }
 
     /////////////////////////////////////
