@@ -112,6 +112,11 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     /** One animation state per `pokemon` layer, posed for the model it belongs to. */
     private val states = mutableMapOf<Int, FloatingState>()
 
+    private val previewPlaceholder: RenderablePokemon? by lazy {
+        if (intro.preview) PokemonSpecies.getByIdentifier(ResourceLocation.fromNamespaceAndPath("cobblemon", "dewott"))
+            ?.let { RenderablePokemon(it, emptySet()) } else null
+    }
+
     /** The team, when the scene draws it. Resolved once rather than on every frame. */
     private val party: List<RenderablePokemon?> = intro.team.map { member ->
         ResourceLocation.tryParse(member.species)
@@ -143,7 +148,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         val progress = progress()
         if (progress >= 1f) {
-            if (skippedAt != null && !done) ClientPlatform.current.send(SkipBattleIntroPayload())
+            if (skippedAt != null && !done && !intro.preview) ClientPlatform.current.send(SkipBattleIntroPayload())
             done = true
             minecraft?.setScreen(null)
             return
@@ -466,7 +471,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     /** The row of Poké Balls: how many Pokémon, never which. */
     private fun teamBalls(guiGraphics: GuiGraphics, layer: IntroLayer, x: Float, y: Float, scale: Float, alpha: Float) {
         val slots = layer.slots.coerceIn(1, PARTY_SLOTS)
-        val filled = (if (layer.isPlayer) playerParty() else intro.teamSize).coerceIn(0, slots)
+        val filled = (if (intro.preview && intro.teamSize >= 0) intro.teamSize else if (layer.isPlayer || intro.preview) playerParty() else intro.teamSize).coerceIn(0, slots)
 
         val size = BALL_SIZE * layer.size * uiScale * scale
         val gap = layer.gap * uiScale * scale
@@ -508,13 +513,13 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         partialTick: Float
     ) {
         if (layer.slot !in 1..PARTY_SLOTS) return
-        val member = if (layer.isPlayer) {
+        val member = (if (layer.isPlayer || intro.preview) {
             runCatching {
                 CobblemonClient.storage.party.get(layer.slot - 1)?.let {
                     RenderablePokemon(it.species, it.aspects)
                 }
             }.getOrNull()
-        } else party.getOrNull(layer.slot - 1)
+        } else party.getOrNull(layer.slot - 1)) ?: previewPlaceholder
         if (member == null) return
         val tall = (layer.height ?: POKEMON_HEIGHT) * uiScale * scale
         if (tall <= 0f) return
@@ -636,7 +641,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
                 ?.let { Component.translatable(it).string }
                 .orEmpty())
             .replace("%level%", intro.level.toString())
-            .replace("%team%", intro.teamSize.toString())
+            .replace("%team%", (if (intro.preview && intro.teamSize < 0) playerParty() else intro.teamSize).toString())
             .replace("%player%", minecraft?.player?.gameProfile?.name.orEmpty())
 
         return Component.translatable(filled)

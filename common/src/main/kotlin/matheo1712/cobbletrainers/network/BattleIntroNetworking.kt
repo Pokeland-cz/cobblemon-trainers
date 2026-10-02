@@ -121,7 +121,8 @@ data class BattleIntroPayload(
     val teamSize: Int,
     val npcId: Int,
     val scene: TrainerIntro,
-    val team: List<TrainerTeamMember>
+    val team: List<TrainerTeamMember>,
+    val preview: Boolean = false
 ) : CustomPacketPayload {
 
     override fun type(): CustomPacketPayload.Type<BattleIntroPayload> = TYPE
@@ -133,6 +134,7 @@ data class BattleIntroPayload(
         val CODEC: StreamCodec<RegistryFriendlyByteBuf, BattleIntroPayload> =
             CustomPacketPayload.codec(
                 { payload, buf ->
+                    buf.writeBoolean(payload.preview)
                     buf.writeUtf(payload.introId)
                     buf.writeUtf(payload.trainerId)
                     buf.writeUtf(payload.trainerName)
@@ -152,6 +154,7 @@ data class BattleIntroPayload(
                 },
                 { buf ->
                     BattleIntroPayload(
+                        preview = buf.readBoolean(),
                         introId = buf.readUtf(),
                         trainerId = buf.readUtf(),
                         trainerName = buf.readUtf(),

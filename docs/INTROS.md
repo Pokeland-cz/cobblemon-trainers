@@ -11,6 +11,21 @@ pendant qu'on l'écrit** : mêmes courbes, mêmes entrées, même écran de 640 
 intros livrées s'y ouvrent comme modèles. Une figure y est dessinée à plat, faute de modèle 3D
 dans un navigateur ; tout le reste est ce que le jeu montrera.
 
+## Tester en jeu
+
+`/cobblemontrainers testintro <intro> [nombre_pokemon] [niveau]` joue uniquement la scène, sans créer de dresseur ni lancer de combat (opérateur, niveau 2, depuis un joueur).
+L'ID est complété avec les intros chargées ; `bw` désigne `cobblemon-trainers:bw`.
+
+| Option | Valeur | Par défaut |
+|---|---|---|
+| `nombre_pokemon` | 0 à 6, nombre de Poké Balls remplies des deux côtés et `%team%` | Taille de votre équipe |
+| `niveau` | 1 à 100, valeur de `%level%` | 50 |
+
+Exemple : `/cobblemontrainers testintro bw 6 80`.
+Les deux figures utilisent votre personnage ; les calques Pokémon des deux côtés utilisent votre équipe. Tout emplacement demandé mais vide affiche Mateloutre, même si votre équipe est entièrement vide. Aucun Pokémon n'est ajouté à votre équipe.
+Les sons des calques sont joués, sans thème de combat. La fermeture et le passage de l'intro ne déclenchent aucun combat. Le test est refusé pendant un combat ou son introduction.
+Après une modification du datapack, faites `/reload` avant de relancer la commande.
+
 ## Sommaire
 
 - [Où ça vit](#où-ça-vit) · [Le fichier](#le-fichier) · [Un calque](#un-calque)

@@ -11,6 +11,21 @@ you write it**: the same curves, the same entrances, the same 640 x 360 screen -
 shipped intros open in it as templates. A figure is drawn flat there, a browser having no 3D
 model to pose; everything else is what the game will show.
 
+## Preview in game
+
+`/cobblemontrainers testintro <intro> [pokemon_count] [level]` plays only the scene, without spawning a trainer or starting a battle (permission level 2, run as a player).
+Suggestions list loaded intros; `bw` means `cobblemon-trainers:bw`.
+
+| Option | Value | Default |
+|---|---|---|
+| `pokemon_count` | 0 to 6, filled Poké Balls on both sides and `%team%` | Your party size |
+| `level` | 1 to 100, value of `%level%` | 50 |
+
+Example: `/cobblemontrainers testintro bw 6 80`.
+Both figures use your character; Pokémon layers on both sides use your party. Any requested empty slot displays Dewott, even with a completely empty party. No Pokémon is added to your party.
+Layer sounds play without a battle theme. Closing or skipping the intro never starts a battle. Previewing is refused during a battle or its introduction.
+After editing the datapack, run `/reload` before previewing again.
+
 ## Contents
 
 - [Where it lives](#where-it-lives) · [The file](#the-file) · [A layer](#a-layer)

@@ -7,11 +7,12 @@ Everything the mod does from the chat fits in one command, `/cobblemontrainers`,
 /cobblemontrainers list [<player>]
 /cobblemontrainers defeat <id|all> [<players>] [reset]
 /cobblemontrainers debugai
+/cobblemontrainers testintro <intro> [pokemon_count] [level]
 ```
 
 *Cette page existe aussi [en français](../COMMANDS.md).*
 
-**Permission level 2 (operator) is checked once, on the root**, and so covers all four verbs.
+**Permission level 2 (operator) is checked once, on the root**, and so covers all verbs.
 An ordinary player sees none of them in the autocompletion: what is meant for them is the
 Battle Phone, which reads the same progress without granting any power at all.
 
@@ -21,6 +22,7 @@ Battle Phone, which reads the same progress without granting any power at all.
 | [`list`](#list) | Reads a player's progress |
 | [`defeat`](#defeat) | Records a win without a battle |
 | [`debugai`](#debugai) | Shows in chat what the mod corrects in the AI |
+| [`testintro`](INTROS.md#preview-in-game) | Plays an intro without a battle |
 
 ## A trainer's ID
 
@@ -114,6 +116,7 @@ what a real win would have done.
 
 ```
 /cobblemontrainers debugai
+/cobblemontrainers testintro <intro> [pokemon_count] [level]
 ```
 
 A switch. While it is on, every decision the mod turns down in a trainer's AI shows up in your
