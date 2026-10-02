@@ -3,7 +3,6 @@ BATTLE INTRO :
 - Pouvoir faire une rotation d'une image (Idée de Coco)
 - Commande pour tester les intros (Idée de Coco)
 - Pouvoir choisir une coordonnée Z pour le dresseur (Idée de Coco)
-- Revoir la logique de placement des pokémon sur l'intro
 - Corriger les fins d'intro qui ont des images qui clignotent et des sons qui ne se jouent pasct
 
 WEB BATTLE INTRO :
