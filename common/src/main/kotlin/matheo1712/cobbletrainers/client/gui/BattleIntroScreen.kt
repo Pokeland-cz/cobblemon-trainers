@@ -24,6 +24,7 @@ import matheo1712.cobbletrainers.intro.TrainerIntro
 import matheo1712.cobbletrainers.network.BattleIntroPayload
 import matheo1712.cobbletrainers.network.SkipBattleIntroPayload
 import net.minecraft.Util
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.screens.inventory.InventoryScreen
@@ -38,6 +39,7 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.item.ItemStack
 import org.joml.Quaternionf
 import org.joml.Vector3f
+import org.lwjgl.opengl.GL11
 
 /**
  * The versus screen: a scene a pack wrote, played over the world while the battle waits.
@@ -48,7 +50,7 @@ import org.joml.Vector3f
  * of the intro, and a player who has seen it before says so with [SkipBattleIntroPayload],
  * which only brings that deadline forward.
  *
- * A scene is a list of layers, drawn in the order written; what each one may say is in
+ * A scene is a list of layers, drawn by increasing Z, then file order; their vocabulary is in
  * [IntroLayer]. Everything here is that vocabulary turned into draw calls, and nothing else -
  * a layer this screen cannot draw was dropped at load, on the server, where a pack author is
  * reading the log.
@@ -90,6 +92,10 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     /** True once the server has been told, or once there is nothing left to tell it. */
     private var done = false
 
+    /** Skipping advances the visual clock to the shared exit, without cutting it short. */
+    private var skippedAt: Long? = null
+    private val orderedLayers = scene.layers.withIndex().sortedBy { it.value.z }
+
     /** One flag per layer: a sound is a moment, not a state. */
     private val soundsPlayed = BooleanArray(scene.layers.size)
 
@@ -120,6 +126,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     private var uiScale = 1f
 
     private val modelOpacity = IntroModelOpacity()
+    private val sceneOpacity = IntroModelOpacity()
 
     override fun init() {
         uiScale = minOf(
@@ -136,7 +143,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         val progress = progress()
         if (progress >= 1f) {
-            // The battle is opening on the server this very moment: nothing left to skip.
+            if (skippedAt != null && !done) ClientPlatform.current.send(SkipBattleIntroPayload())
             done = true
             minecraft?.setScreen(null)
             return
@@ -147,29 +154,35 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         // hands it back rather than cutting to it twice.
         val fadeIn = scene.fadeIn.coerceAtLeast(1).toFloat()
         val fadeOut = scene.fadeOut.coerceAtLeast(1).toFloat()
-        // How much of the screen is left: 1 until the fade-out starts, 0 as it ends. It is the
-        // shared fade, including models composited by IntroModelOpacity.
+        // Fade the completed scene once: overlapping layers must not reveal each other
+        // during the exit, and cutout models must follow the exact same curve as images.
         val leaving = 1f - eased((elapsed - (ticks - fadeOut)) / fadeOut)
         val alpha = eased(elapsed / fadeIn) * leaving
         if (alpha <= 0f) return
 
-        scene.layers.forEachIndexed { index, layer ->
-            val entrance = entranceOf(layer, elapsed)
-            if (elapsed < layer.at) return@forEachIndexed
-
-            playSound(index, layer, elapsed)
-            drawLayer(guiGraphics, index, layer, entrance, alpha, partialTick)
+        sceneOpacity.draw(guiGraphics, alpha) {
+            orderedLayers.forEach { (index, layer) ->
+                if (elapsed < layer.at) return@forEach
+                // Inventory models use their own depth offsets. Flush and clear between
+                // layers so those offsets cannot override the pack's stacking order.
+                clearLayerDepth(guiGraphics)
+                playSound(index, layer, elapsed)
+                drawLayer(guiGraphics, index, layer, entranceOf(layer, elapsed), 1f, partialTick)
+            }
+            clearLayerDepth(guiGraphics)
+            if (elapsed >= skipAt) {
+                guiGraphics.drawCenteredString(
+                    font, SKIP_HINT, width / 2,
+                    height - (HINT_MARGIN * uiScale).toInt(), argb(HINT_ALPHA, HINT)
+                )
+            }
         }
+    }
 
-        if (elapsed >= skipAt) {
-            guiGraphics.drawCenteredString(
-                font,
-                SKIP_HINT,
-                width / 2,
-                height - (HINT_MARGIN * uiScale).toInt(),
-                argb(alpha * HINT_ALPHA, HINT)
-            )
-        }
+    private fun clearLayerDepth(graphics: GuiGraphics) {
+        graphics.flush()
+        RenderSystem.depthMask(true)
+        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX)
     }
 
     /////////////////////////////////////
@@ -587,6 +600,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         quietened?.hideNameTag = quietenedWas
         quietened = null
         modelOpacity.close()
+        sceneOpacity.close()
         super.removed()
     }
 
@@ -756,16 +770,21 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         skip()
     }
 
-    /** Tells the server to get on with it, and steps out of the way. */
+    /** Finish the common fade before telling the server to open the battle. */
     private fun skip() {
-        if (done || progress() * ticks < skipAt) return
+        if (done || skippedAt != null || progress() * ticks < skipAt) return
+        if (progress() * ticks >= ticks - scene.fadeOut.coerceAtLeast(1)) return
 
-        done = true
-        ClientPlatform.current.send(SkipBattleIntroPayload())
-        minecraft?.setScreen(null)
+        skippedAt = Util.getMillis()
     }
 
-    private fun progress(): Float = ((Util.getMillis() - opened) / length).coerceIn(0f, 1f)
+    private fun progress(): Float {
+        val now = Util.getMillis()
+        val elapsed = skippedAt?.let {
+            length - scene.fadeOut.coerceAtLeast(1) * MS_PER_TICK + (now - it)
+        } ?: (now - opened).toFloat()
+        return (elapsed / length).coerceIn(0f, 1f)
+    }
 
     private fun argb(alpha: Float, rgb: Int): Int =
         ((alpha.coerceIn(0f, 1f) * 255f).toInt() shl 24) or rgb

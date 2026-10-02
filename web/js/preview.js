@@ -441,6 +441,11 @@ const Preview = (() => {
     }
   };
 
+  const orderedLayers = (layers) => layers.map((layer, index) => ({ layer, index }))
+    .sort((a, b) => (a.layer.z ?? 0) - (b.layer.z ?? 0));
+
+  const sceneBuffers = new WeakMap();
+
   /**
    * One frame of a scene.
    *
@@ -453,11 +458,20 @@ const Preview = (() => {
    */
   const frame = (canvas, scene, elapsed, about, hidden, options) => {
     const layout = Boolean(options && options.layout);
-    const ctx = canvas.getContext('2d');
+    const output = canvas.getContext('2d');
+    output.clearRect(0, 0, WIDTH, HEIGHT);
+    let buffer = sceneBuffers.get(canvas);
+    if (!buffer) {
+      buffer = document.createElement('canvas');
+      buffer.width = WIDTH;
+      buffer.height = HEIGHT;
+      sceneBuffers.set(canvas, buffer);
+    }
+    const ctx = buffer.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-    const ticks = Math.max(scene.duration ?? 100, 1);
+    const ticks = Math.min(Math.max(scene.duration ?? 100, 20), 200);
     const fadeIn = Math.max(scene.fadeIn ?? 4, 1);
     const fadeOut = Math.max(scene.fadeOut ?? 8, 1);
     const leaving = layout ? 1 : 1 - eased((elapsed - (ticks - fadeOut)) / fadeOut);
@@ -465,7 +479,7 @@ const Preview = (() => {
     const boxes = [];
     if (screenAlpha <= 0) return boxes;
 
-    (scene.layers || []).forEach((layer, index) => {
+    orderedLayers(scene.layers || []).forEach(({ layer, index }) => {
       if (hidden && hidden.has(index)) return;
       if (!layout && elapsed < (layer.at ?? 0)) return;
       if (!draw[layer.type]) return;
@@ -480,7 +494,7 @@ const Preview = (() => {
 
       let x = restX;
       let y = restY;
-      let alpha = screenAlpha * (layer.alpha ?? 1);
+      let alpha = layer.alpha ?? 1;
       let scale = 1;
 
       switch (layout ? 'none' : (layer.from ?? 'fade')) {
@@ -503,9 +517,15 @@ const Preview = (() => {
       draw[layer.type](ctx, layer, x, y, scale, Math.min(alpha, 1), about);
     });
 
+    // Fade the assembled scene once so overlapping images keep their relative appearance.
+    output.save();
+    output.imageSmoothingEnabled = false;
+    output.globalAlpha = screenAlpha;
+    output.drawImage(buffer, 0, 0);
+    output.restore();
     return boxes;
   };
 
-  return { frame, give, texture, skin, extent, rest, restBox, anchorX, anchorY,
+  return { frame, give, texture, skin, extent, rest, restBox, anchorX, anchorY, orderedLayers,
            WIDTH, HEIGHT, onRepaint: null, drawFlatSkin: figure };
 })();

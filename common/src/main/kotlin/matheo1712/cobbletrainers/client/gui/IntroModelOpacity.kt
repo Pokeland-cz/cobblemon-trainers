@@ -13,12 +13,13 @@ import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL14
 import org.lwjgl.opengl.GL30
 
-/** Fades the completed model, including cutout materials and equipment, as one layer. */
+/** Fades a completed model or scene, including cutout materials, as one image. */
 internal class IntroModelOpacity : AutoCloseable {
     private var backdrop: TextureTarget? = null
 
     fun draw(graphics: GuiGraphics, alpha: Float, render: () -> Unit) {
         if (alpha <= 0f) return
+        graphics.flush()
         graphics.setColor(1f, 1f, 1f, 1f)
         if (alpha >= 1f) {
             render()
@@ -48,6 +49,7 @@ internal class IntroModelOpacity : AutoCloseable {
         }
 
         render()
+        graphics.flush()
         graphics.setColor(1f, 1f, 1f, 1f)
         val matrix = graphics.pose().last().pose()
         val width = client.window.guiScaledWidth.toFloat()

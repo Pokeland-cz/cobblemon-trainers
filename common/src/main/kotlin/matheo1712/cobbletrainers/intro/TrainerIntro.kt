@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation
  * An intro: the screen a trainer is announced with, written by whoever ships the pack.
  *
  * It is a **scene in layers**. The mod owns none of it - the backdrop is a `fill` like any
- * other - and draws them in the order they are written, the first one behind. What each layer
+ * other - and draws them by increasing Z, then in file order. What each layer
  * is, and what it may say, is in [IntroLayer].
  *
  * A trainer names one through `battle.intro`, and several trainers may name the same: an intro
@@ -23,7 +23,7 @@ import net.minecraft.resources.ResourceLocation
  *   run out - see [matheo1712.cobbletrainers.battle.TrainerBattleIntro].
  * @param fadeIn Ticks the whole screen takes to arrive over the world.
  * @param fadeOut Ticks it takes to hand it back.
- * @param layers The scene, drawn in the order written.
+ * @param layers The scene, drawn by increasing Z with file order breaking ties.
  */
 data class TrainerIntro(
     val duration: Int = DEFAULT_TICKS,
@@ -86,6 +86,7 @@ data class TrainerIntro(
  * @param type What is drawn. One of [TYPES]; anything else is dropped at load.
  * @param anchor Which of the nine points of the screen the layer puts its centre on.
  * @param offset Where it goes from there, `[x, y]`, in the reference screen's pixels.
+ * @param z Stacking order: larger values are in front; ties keep file order.
  * @param at The tick its entrance starts on.
  * @param length How many ticks that entrance lasts. Named `for` in the JSON, which Kotlin
  *   cannot spell as an identifier.
@@ -116,6 +117,7 @@ data class IntroLayer(
     val type: String = "",
     val anchor: String = "center",
     val offset: List<Int> = emptyList(),
+    val z: Int = 0,
     val at: Int = 0,
     @SerializedName("for") val length: Int = DEFAULT_ENTRANCE,
     val from: String = "fade",

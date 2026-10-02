@@ -58,7 +58,7 @@ default, and what every route trainer wants.
 | `duration` | `100` | How long the screen stays up, in ticks (20 a second), 20 to 200 |
 | `fadeIn` | `4` | Ticks the screen takes to arrive over the world |
 | `fadeOut` | `8` | Ticks it takes to hand it back |
-| `layers` | `[]` | The layers, **drawn in the order written**: the first one is behind |
+| `layers` | `[]` | Layers drawn by increasing `z`; ties keep file order, first behind |
 
 The duration belongs to the intro rather than to the trainer: it is the intro that knows how
 much time its layers need.
@@ -72,6 +72,7 @@ These fields apply to every type.
 | `type` | - | `figure`, `text`, `image`, `fill`, `vs`, `team_balls`, `pokemon` |
 | `anchor` | `center` | Which point of the screen the layer puts its **centre** on |
 | `offset` | `[0, 0]` | Where it goes from there, `[x, y]`, in reference pixels |
+| `z` | `0` | Integer stacking order: larger = in front, without changing the layer's size |
 | `at` | `0` | The tick its entrance starts on |
 | `for` | `12` | How many ticks that entrance lasts |
 | `from` | `fade` | `left`, `right`, `top`, `bottom`, `fade`, `pop`, `none` |
@@ -79,6 +80,9 @@ These fields apply to every type.
 | `alpha` | `1` | Its opacity once it has landed, including 3D models |
 | `sound` | - | A sound played **once**, on tick `at` |
 | `volume` / `pitch` | `1` / `1` | For that sound |
+
+To place a shadow image behind the trainer, give it `z: 0` and the trainer's `figure`
+`z: 1`. Layers without `z` keep their file order.
 
 `from` is the entrance: the four sides slide the layer in from off screen, `fade` brings it up,
 `pop` grows it past its size and settles, and `none` simply puts it there.
@@ -287,10 +291,12 @@ corner at any size. `offset` goes from there.
 Everything is counted in ticks, 20 a second, from the moment the screen goes up.
 
 - `at` is when a layer starts coming in, `for` how long that takes.
-- **The exit is shared**: `fadeOut` fades every layer, including 3D models.
+- **The exit is shared**: `fadeOut` fades the entire scene as one image, including 3D models.
+  All layers disappear together without revealing the layers behind them.
 - The player may skip **once the last entrance has landed** - the largest `at + for` of all the
   layers. Before that nothing answers: a held key repeats, and nobody should skip a screen they
   have not seen.
+  Skipping starts the same fade before closing the screen; an ongoing fade finishes normally.
 - The trainer's battle music starts when the screen goes up, not on the first turn.
 
 ## Sounds

@@ -188,8 +188,8 @@ const Stage = (() => {
 
     /** The topmost layer under the pointer - topmost, because that is the one on top. */
     const layerAt = (px, py) => {
-      const list = layers();
-      for (let index = list.length - 1; index >= 0; index -= 1) {
+      const list = Preview.orderedLayers(layers()).reverse();
+      for (const { index } of list) {
         if (state.hidden.has(index)) continue;
         const box = boxOf(index);
         if (!box) continue;
