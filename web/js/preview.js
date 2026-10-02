@@ -189,7 +189,11 @@ const Preview = (() => {
       case 'image': {
         const image = texture(layer.texture);
         const known = image && image !== 'missing' ? image : null;
-        return [layer.width ?? (known ? known.width : 64), layer.height ?? (known ? known.height : 64)];
+        const w = layer.width ?? (known ? known.width : 64);
+        const h = layer.height ?? (known ? known.height : 64);
+        const angle = imageAngle(layer);
+        const c = Math.abs(Math.cos(angle)), s = Math.abs(Math.sin(angle));
+        return [w * c + h * s, w * s + h * c];
       }
       case 'team_balls': {
         const slots = Math.min(Math.max(layer.slots ?? 6, 1), 6);
@@ -225,6 +229,8 @@ const Preview = (() => {
     .replace(/%level%/g, about.level ?? 1)
     .replace(/%team%/g, about.team ?? 0)
     .replace(/%player%/g, about.player || 'RereBleue');
+
+  const imageAngle = (layer) => Number.isFinite(layer.rotation) ? layer.rotation * Math.PI / 180 : 0;
 
   const rgb = (color, fallback) => {
     const text = String(color ?? '').trim().replace('#', '');
@@ -381,7 +387,9 @@ const Preview = (() => {
           ctx.globalAlpha = alpha * 0.5;
           ctx.strokeStyle = rgb(layer.color, '#FFFFFF');
           ctx.setLineDash([4, 4]);
-          ctx.strokeRect(Math.round(x - w / 2), Math.round(y - h / 2), Math.round(w), Math.round(h));
+          ctx.translate(x, y);
+          ctx.rotate(imageAngle(layer));
+          ctx.strokeRect(Math.round(-w / 2), Math.round(-h / 2), Math.round(w), Math.round(h));
           ctx.restore();
         }
         return;
@@ -392,7 +400,9 @@ const Preview = (() => {
       const source = tint.toUpperCase() === '#FFFFFF' ? image : tinted(image, tint);
       ctx.save();
       ctx.globalAlpha = alpha;
-      ctx.drawImage(source, Math.round(x - w / 2), Math.round(y - h / 2), Math.round(w), Math.round(h));
+      ctx.translate(x, y);
+      ctx.rotate(imageAngle(layer));
+      ctx.drawImage(source, Math.round(-w / 2), Math.round(-h / 2), Math.round(w), Math.round(h));
       ctx.restore();
     },
 

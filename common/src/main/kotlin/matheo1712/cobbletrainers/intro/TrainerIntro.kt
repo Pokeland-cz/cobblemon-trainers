@@ -106,6 +106,7 @@ data class TrainerIntro(
  * @param shadow Whether that text is drawn with its drop shadow.
  * @param texture The image of an `image` layer. It is read by the *client*, so it ships under
  *   `assets/` - the same rule as battle music.
+ * @param rotation Clockwise image rotation around its centre, in degrees.
  * @param yaw Which way a model is turned, in degrees. 0 faces the player.
  * @param tilt How far it looks up or down, in degrees.
  * @param slot Which Pokémon of the team a `pokemon` layer draws, from 1.
@@ -136,6 +137,7 @@ data class IntroLayer(
     val size: Float = 1f,
     val shadow: Boolean = true,
     val texture: String? = null,
+    val rotation: Float = 0f,
     val yaw: Float = 0f,
     val tilt: Float = 0f,
     val slot: Int = 1,

@@ -439,6 +439,12 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         val drawWidth = (layer.width ?: fileWidth) * uiScale * scale
         val drawHeight = (layer.height ?: fileHeight) * uiScale * scale
         val tint = rgb(layer.color, WHITE)
+        val pose = guiGraphics.pose()
+        pose.pushPose()
+        pose.translate(x, y, 0f)
+        pose.mulPose(Quaternionf().rotateZ(Math.toRadians(
+            (layer.rotation.takeIf { it.isFinite() } ?: 0f).toDouble()
+        ).toFloat()))
 
         guiGraphics.setColor(
             ((tint shr 16) and 0xFF) / 255f,
@@ -454,8 +460,8 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         RenderSystem.defaultBlendFunc()
         guiGraphics.blit(
             texture,
-            (x - drawWidth / 2f).toInt(),
-            (y - drawHeight / 2f).toInt(),
+            (-drawWidth / 2f).toInt(),
+            (-drawHeight / 2f).toInt(),
             drawWidth.toInt(),
             drawHeight.toInt(),
             0f,
@@ -465,6 +471,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
             fileWidth,
             fileHeight
         )
+        pose.popPose()
         guiGraphics.setColor(1f, 1f, 1f, 1f)
     }
 

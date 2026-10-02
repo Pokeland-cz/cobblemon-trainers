@@ -151,7 +151,8 @@ what comes out is shown as it is.
 | --- | --- | --- |
 | `texture` | - | `my_pack:textures/gui/intro/logo.png`, **required** |
 | `width` / `height` | the file's size | The drawn size, in reference pixels |
-| `color` | `#FFFFFF` | A tint laid over the image |
+| `color` | `#FFFFFF` | Tint: a white image takes this colour, a grey image keeps its shading; white preserves the original colours |
+| `rotation` | `0` | Rotation in degrees around the image centre, positive clockwise, negative counterclockwise |
 
 The image is read **by the client**: it lives under `assets/`, so the pack goes in `mods/` or
 doubles as a resource pack. Same rule as the music.
