@@ -273,10 +273,10 @@ const Validate = (() => {
           name + ' : aucune image de ce nom dans le pack, le calque ne dessinera rien.',
           label + ': no image of that name in the pack, the layer will draw nothing.');
       }
-      if (layer.type === 'pokemon') {
+      if (layer.type === 'pokemon' && layer.who !== 'player') {
         say(found, 'info',
-          name + ' montre un Pokémon de l’équipe avant le combat. Aucune intro du mod ne le fait.',
-          label + ' shows a team Pokémon before the battle. None of the mod’s own intros does.');
+          name + ' montre un Pokémon de l’équipe adverse avant le combat.',
+          label + ' shows an opposing team Pokémon before the battle.');
       }
       const end = (layer.at ?? 0) + (layer.for ?? 12);
       last = Math.max(last, end);

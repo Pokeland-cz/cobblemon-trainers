@@ -40,7 +40,7 @@ data class TrainerIntro(
         layers.maxOfOrNull { it.at + it.length }?.coerceIn(0, ticks()) ?: 0
 
     /** Whether any layer needs the trainer's team sent along - only those cost a lookup. */
-    fun needsTeam(): Boolean = layers.any { it.type == IntroLayer.POKEMON }
+    fun needsTeam(): Boolean = layers.any { it.type == IntroLayer.POKEMON && !it.isPlayer }
 
     /**
      * Drops what cannot be drawn and says so, once, at load. A layer the client would not know
