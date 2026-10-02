@@ -252,10 +252,6 @@ them. All are **white on transparent**: the layer's `color` is what gives them t
 through it (`pop`), and four prismatic shards drop in from four sides at four different
 moments - it is the only one of the eight that refuses symmetry, and that is the point.
 
-**`rerebleue` shows the trainer's first Pokémon**, in a 123-pixel frame at the top right,
-rotated by -35°. Both figures have the same size and symmetrical positions.
-The other seven intros do not show Pokémon before the battle.
-
 An emblem belongs behind its trainer as a watermark - `alpha` around `0.3`, sized 180 to 230 -
 rather than in full light: what has to read is the figure.
 

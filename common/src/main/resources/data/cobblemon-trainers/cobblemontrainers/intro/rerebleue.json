@@ -1,131 +1,123 @@
 {
-  "duration": 100,
-  "fadeIn": 4,
-  "fadeOut": 8,
-  "layers": [
-    {
-      "type": "fill",
-      "color": "#05060D",
-      "alpha": 0.88,
-      "from": "fade",
-      "for": 4
-    },
-    {
-      "type": "image",
-      "texture": "cobblemon-trainers:textures/gui/intro/fond_rerebleue.png",
-      "width": 668,
-      "height": 668,
-      "offset": [
-        -10,
-        0
-      ],
-      "at": 6,
-      "for": 24
-    },
-    {
-      "type": "fill",
-      "color": "#AE7ADE",
-      "alpha": 0.55,
-      "slant": 0.35,
-      "width": 128,
-      "offset": [
-        -128,
-        0
-      ],
-      "from": "left",
-      "for": 18
-    },
-    {
-      "type": "fill",
-      "color": "#C0C0C0",
-      "alpha": 0.55,
-      "slant": 0.35,
-      "width": 128,
-      "offset": [
-        128,
-        0
-      ],
-      "from": "right",
-      "for": 18
-    },
-    {
-      "type": "figure",
-      "who": "player",
-      "height": 349,
-      "yaw": 22,
-      "offset": [
-        -191,
-        120
-      ],
-      "from": "left",
-      "for": 18
-    },
-    {
-      "type": "figure",
-      "who": "trainer",
-      "height": 349,
-      "yaw": -22,
-      "offset": [
-        191,
-        120
-      ],
-      "from": "right",
-      "for": 18
-    },
-    {
-      "type": "text",
-      "value": "%player%",
-      "offset": [
-        -128,
-        -95
-      ],
-      "at": 18,
-      "for": 6,
-      "from": "fade"
-    },
-    {
-      "type": "text",
-      "value": "%name%",
-      "offset": [
-        128,
-        -95
-      ],
-      "at": 18,
-      "for": 6,
-      "from": "fade"
-    },
-    {
-      "type": "image",
-      "texture": "cobblemon-trainers:textures/gui/intro/circle.png",
-      "width": 106,
-      "height": 103,
-      "offset": [
-        -1,
-        0
-      ],
-      "at": 18
-    },
-    {
-      "type": "vs",
-      "size": 4,
-      "at": 18,
-      "for": 6,
-      "from": "pop"
-    },
-    {
-      "type": "pokemon",
-      "who": "trainer",
-      "slot": 1,
-      "yaw": -35,
-      "tilt": -13,
-      "from": "right",
-      "at": 1,
-      "offset": [
-        240,
-        -118
-      ],
-      "height": 123,
-      "for": 17
-    }
-  ]
+ "duration": 100,
+ "fadeIn": 4,
+ "fadeOut": 8,
+ "layers": [
+  {
+   "type": "fill",
+   "color": "#05060D",
+   "alpha": 0.98,
+   "from": "fade",
+   "for": 4
+  },
+  {
+   "type": "image",
+   "texture": "cobblemon-trainers:textures/gui/intro/fond_rerebleue.png",
+   "width": 668,
+   "height": 668,
+   "offset": [
+    0,
+    0
+   ],
+   "at": 6,
+   "for": 24,
+   "alpha": 0.22
+  },
+  {
+   "type": "fill",
+   "color": "#3976B8",
+   "alpha": 0.42,
+   "slant": 0.22,
+   "width": 158,
+   "offset": [
+    -170,
+    0
+   ],
+   "from": "left",
+   "for": 18
+  },
+  {
+   "type": "fill",
+   "color": "#AE7ADE",
+   "alpha": 0.42,
+   "slant": -0.22,
+   "width": 158,
+   "offset": [
+    170,
+    0
+   ],
+   "from": "right",
+   "for": 18
+  },
+  {
+   "type": "figure",
+   "who": "player",
+   "height": 300,
+   "yaw": 22,
+   "offset": [
+    -170,
+    94
+   ],
+   "from": "left",
+   "for": 18
+  },
+  {
+   "type": "figure",
+   "who": "trainer",
+   "height": 300,
+   "yaw": -22,
+   "offset": [
+    170,
+    94
+   ],
+   "from": "right",
+   "for": 18
+  },
+  {
+   "type": "text",
+   "value": "%player%",
+   "offset": [
+    -170,
+    -95
+   ],
+   "at": 18,
+   "for": 6,
+   "from": "fade",
+   "size": 1.25,
+   "color": "#F3EAFB"
+  },
+  {
+   "type": "text",
+   "value": "%name%",
+   "offset": [
+    170,
+    -95
+   ],
+   "at": 18,
+   "for": 6,
+   "from": "fade",
+   "size": 1.25,
+   "color": "#F3EAFB"
+  },
+  {
+   "type": "image",
+   "texture": "cobblemon-trainers:textures/gui/intro/circle.png",
+   "width": 96,
+   "height": 96,
+   "offset": [
+    0,
+    0
+   ],
+   "at": 18,
+   "color": "#AE7ADE"
+  },
+  {
+   "type": "vs",
+   "size": 4,
+   "at": 18,
+   "for": 6,
+   "from": "pop",
+   "color": "#FFF0D0"
+  }
+ ]
 }

@@ -255,10 +255,6 @@ leur donne leur teinte.
 elle en sort (`pop`), et quatre éclats prismatiques tombent des quatre côtés à quatre moments
 différents - c'est la seule des huit qui refuse la symétrie, et c'est le sujet.
 
-**`rerebleue` montre le premier Pokémon du dresseur**, dans un cadre de 123 pixels en haut
-à droite, tourné de -35°. Les deux figures ont la même taille et des positions symétriques.
-Les sept autres intros ne montrent pas de Pokémon avant le combat.
-
 Un emblème se pose en filigrane derrière son dresseur - `alpha` autour de `0.3`, taille de 180
 à 230 - plutôt qu'en pleine lumière : ce qui doit se lire, c'est la figure.
 
