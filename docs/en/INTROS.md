@@ -170,16 +170,34 @@ The row of Poké Balls: it says **how many** Pokémon, never which.
 
 ### `pokemon`
 
-The model of one Pokémon of the trainer's team, as the battle phone draws it - regional form
+The model of one Pokémon of the selected team, as the battle phone draws it - regional form
 and shiny included.
 
 | Field | Default | Role |
 | --- | --- | --- |
+| `who` | `"trainer"` | `trainer` for the opponent, `player` for the player |
 | `slot` | `1` | Which one, from 1 |
-| `height` | `64` | How tall it is drawn, in reference pixels |
-| `yaw` | `0` | How far it is turned |
+| `height` | `64` | Side of the framing square, in reference pixels |
+| `yaw` | `0` | Rotation in degrees; `180` turns the Pokémon around |
+| `tilt` | `0` | Tilt in degrees added to the 13° profile view; `-13` makes it level |
 
-**This shows the team before the battle.** Keep it for the boss whose legendary is the point.
+`anchor` and `offset` place the centre of the square shown in the web editor; `height` sets its side.
+The animated model is centred and fitted into this square after rotation, without distortion:
+its largest projected dimension (width or height) fills the square.
+An empty slot draws nothing. Each Pokémon needs its own layer.
+Only `who: "trainer"` layers request the opponent's team from the server.
+
+Two Pokémon facing each other, to the left and right of the centre:
+
+```json
+[
+  { "type": "pokemon", "who": "player", "slot": 1, "offset": [-140, 0], "height": 100, "yaw": 90, "tilt": -13 },
+  { "type": "pokemon", "who": "trainer", "slot": 1, "offset": [140, 0], "height": 100, "yaw": -90, "tilt": -13 }
+]
+```
+
+Add these layers to the intro's `layers` array.
+**Showing the trainer's Pokémon reveals their team before the battle.** Keep it for the boss whose legendary is the point.
 
 ## The intros that ship
 
@@ -234,8 +252,9 @@ them. All are **white on transparent**: the layer's `color` is what gives them t
 through it (`pop`), and four prismatic shards drop in from four sides at four different
 moments - it is the only one of the eight that refuses symmetry, and that is the point.
 
-**None of the eight uses a `pokemon` layer**, deliberately: the mod never shows a team before
-the battle. The layer is there for the packs that want it, not for us.
+**`rerebleue` shows the trainer's first Pokémon**, in a 123-pixel frame at the top right,
+rotated by -35°. Both figures have the same size and symmetrical positions.
+The other seven intros do not show Pokémon before the battle.
 
 An emblem belongs behind its trainer as a watermark - `alpha` around `0.3`, sized 180 to 230 -
 rather than in full light: what has to read is the figure.

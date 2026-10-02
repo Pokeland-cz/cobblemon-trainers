@@ -342,9 +342,13 @@ const SCHEMA = (() => {
       { k: 'empty', t: 'bool', def: true, l: t('Montrer les vides', 'Show the empty ones') }
     ] },
     pokemon: { l: t('Pokémon', 'Pokémon'), fields: [
+      WHO,
       { k: 'slot', t: 'num', def: 1, min: 1, max: 6, l: t('Rang dans l’équipe', 'Party slot') },
-      { k: 'height', t: 'num', def: 64, l: t('Hauteur', 'Height') },
-      { k: 'yaw', t: 'num', def: 0, l: t('Rotation', 'Yaw') }
+      { k: 'height', t: 'num', def: 64, min: 1, l: t('Taille du cadre', 'Frame size'),
+        h: t('Côté du carré en pixels. Le modèle en jeu est centré et ajusté dedans, sans déformation.',
+             'Square side in pixels. The in-game model is centred and fitted inside without distortion.') },
+      { k: 'yaw', t: 'num', def: 0, l: t('Rotation', 'Yaw'), h: t('En degrés : 180 retourne le Pokémon.', 'In degrees: 180 turns the Pokémon around.') },
+      { k: 'tilt', t: 'num', def: 0, l: t('Inclinaison', 'Tilt'), h: t('En degrés, ajoutés à la vue de profil (13°).', 'In degrees, added to the profile view (13°).') }
     ] }
   };
 

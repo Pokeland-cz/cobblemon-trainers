@@ -171,16 +171,34 @@ La rangée de Poké Balls : elle dit **combien** de Pokémon, jamais lesquels.
 
 ### `pokemon`
 
-Le modèle d'un Pokémon de l'équipe du dresseur, comme dans la fiche du Battle Phone - forme
+Le modèle d'un Pokémon de l'équipe choisie, comme dans la fiche du Battle Phone - forme
 régionale et chromatique comprises.
 
 | Champ | Défaut | Rôle |
 | --- | --- | --- |
+| `who` | `"trainer"` | `trainer` pour le dresseur adverse, `player` pour le joueur |
 | `slot` | `1` | Le rang dans l'équipe, à partir de 1 |
-| `height` | `64` | Sa hauteur, en pixels de référence |
-| `yaw` | `0` | De combien il est tourné |
+| `height` | `64` | Côté du carré de cadrage, en pixels de référence |
+| `yaw` | `0` | Rotation en degrés ; `180` retourne le Pokémon |
+| `tilt` | `0` | Inclinaison en degrés ajoutée à la vue de profil de 13° ; `-13` la remet à plat |
 
-**Ça montre l'équipe avant le combat.** À réserver au boss dont le légendaire est l'argument.
+`anchor` et `offset` placent le centre du carré montré par l'éditeur web ; `height` règle son côté.
+Le modèle animé est centré et ajusté dans ce carré après rotation, sans déformation :
+sa plus grande dimension projetée (largeur ou hauteur) remplit le carré.
+Un emplacement vide ne dessine rien. Chaque Pokémon demande son propre calque.
+Seuls les calques `who: "trainer"` demandent l'équipe adverse au serveur.
+
+Exemple de deux Pokémon face à face, à gauche et à droite du centre :
+
+```json
+[
+  { "type": "pokemon", "who": "player", "slot": 1, "offset": [-140, 0], "height": 100, "yaw": 90, "tilt": -13 },
+  { "type": "pokemon", "who": "trainer", "slot": 1, "offset": [140, 0], "height": 100, "yaw": -90, "tilt": -13 }
+]
+```
+
+Ces calques s'ajoutent au tableau `layers` de l'intro.
+**Afficher le dresseur révèle son équipe avant le combat.** À réserver au boss dont le légendaire est l'argument.
 
 ## Les intros livrées
 
@@ -237,8 +255,9 @@ leur donne leur teinte.
 elle en sort (`pop`), et quatre éclats prismatiques tombent des quatre côtés à quatre moments
 différents - c'est la seule des huit qui refuse la symétrie, et c'est le sujet.
 
-**Aucune des huit ne pose de calque `pokemon`**, et c'est voulu : le mod ne montre jamais une
-équipe avant le combat. Le calque existe pour les packs qui le veulent, pas pour nous.
+**`rerebleue` montre le premier Pokémon du dresseur**, dans un cadre de 123 pixels en haut
+à droite, tourné de -35°. Les deux figures ont la même taille et des positions symétriques.
+Les sept autres intros ne montrent pas de Pokémon avant le combat.
 
 Un emblème se pose en filigrane derrière son dresseur - `alpha` autour de `0.3`, taille de 180
 à 230 - plutôt qu'en pleine lumière : ce qui doit se lire, c'est la figure.

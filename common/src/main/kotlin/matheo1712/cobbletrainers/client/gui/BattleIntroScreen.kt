@@ -5,6 +5,12 @@ import matheo1712.cobbletrainers.client.platform.ClientPlatform
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies
 import com.cobblemon.mod.common.client.CobblemonClient
 import com.cobblemon.mod.common.client.gui.drawProfilePokemon
+import com.cobblemon.mod.common.client.gui.ProfileTransformType
+import com.cobblemon.mod.common.client.render.SpriteType
+import com.cobblemon.mod.common.client.render.models.blockbench.repository.VaryingModelRepository
+import com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext
+import com.cobblemon.mod.common.entity.PoseType
+import com.mojang.blaze3d.vertex.PoseStack
 import com.cobblemon.mod.common.client.render.models.blockbench.FloatingState
 import com.cobblemon.mod.common.entity.npc.NPCEntity
 import com.cobblemon.mod.common.pokemon.RenderablePokemon
@@ -101,7 +107,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     private val states = mutableMapOf<Int, FloatingState>()
 
     /** The team, when the scene draws it. Resolved once rather than on every frame. */
-    private val party: List<RenderablePokemon> = intro.team.mapNotNull { member ->
+    private val party: List<RenderablePokemon?> = intro.team.map { member ->
         ResourceLocation.tryParse(member.species)
             ?.let { PokemonSpecies.getByIdentifier(it) }
             ?.let { RenderablePokemon(it, member.aspects.toSet()) }
@@ -488,23 +494,62 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         alpha: Float,
         partialTick: Float
     ) {
-        val member = party.getOrNull(layer.slot - 1) ?: return
+        if (layer.slot !in 1..PARTY_SLOTS) return
+        val member = if (layer.isPlayer) {
+            runCatching {
+                CobblemonClient.storage.party.get(layer.slot - 1)?.let {
+                    RenderablePokemon(it.species, it.aspects)
+                }
+            }.getOrNull()
+        } else party.getOrNull(layer.slot - 1)
+        if (member == null) return
         val tall = (layer.height ?: POKEMON_HEIGHT) * uiScale * scale
+        if (tall <= 0f) return
         val state = states.getOrPut(index) { FloatingState() }
+        val rotation = Quaternionf().fromEulerXYZDegrees(Vector3f(MODEL_TILT + layer.tilt, layer.yaw, 0f))
+        state.currentAspects = member.aspects
+        val sprite = VaryingModelRepository.getSprite(member.species.resourceIdentifier, state, SpriteType.PROFILE)
+        if (sprite != null) {
+            image(guiGraphics, layer.copy(texture = sprite.toString(), width = layer.height ?: POKEMON_HEIGHT,
+                height = layer.height ?: POKEMON_HEIGHT),
+                x, y, scale, alpha)
+            return
+        }
+        val model = VaryingModelRepository.getPoser(member.species.resourceIdentifier, state)
+        state.currentModel = model
+        state.setPoseToFirstSuitable(PoseType.PROFILE)
+        state.updatePartialTicks(partialTick)
+        val bounds = IntroPokemonBounds()
+        val measuringPose = PoseStack()
+        measuringPose.scale(1f, 1f, -1f)
+        measuringPose.mulPose(rotation)
+        val context = RenderContext()
+        context.put(RenderContext.RENDER_STATE, RenderContext.RenderState.PROFILE)
+        context.put(RenderContext.POSABLE_STATE, state)
+        context.put(RenderContext.DO_QUIRKS, false)
+        model.context = context
+        try {
+            model.applyAnimations(null, state, 0f, 0f, 0f, 0f, 0f)
+            model.rootPart.render(context, measuringPose, bounds, 0, 0, -1)
+        } finally {
+            model.setDefault()
+        }
+        if (!bounds.extent.isFinite() || bounds.extent <= 0f) return
+        val modelScale = tall / bounds.extent
 
         val pose = guiGraphics.pose()
         pose.pushPose()
-        // A model hangs below the point it is translated to, so aim near the top of it.
-        pose.translate(x, y - tall / 2f, 0f)
-        pose.scale(MODEL_POSE_SCALE, MODEL_POSE_SCALE, 1f)
+        // Fit the rotated geometry into the same centred square the web editor displays.
+        pose.translate(x - bounds.centerX * modelScale, y - bounds.centerY * modelScale, 0f)
         guiGraphics.setColor(1f, 1f, 1f, alpha)
         drawProfilePokemon(
             renderablePokemon = member,
             matrixStack = pose,
-            rotation = Quaternionf().fromEulerXYZDegrees(Vector3f(MODEL_TILT, layer.yaw, 0f)),
+            rotation = rotation,
             state = state,
             partialTicks = partialTick,
-            scale = tall / MODEL_HEIGHT_UNIT
+            scale = modelScale,
+            profileTransformType = ProfileTransformType.NONE
         )
         guiGraphics.setColor(1f, 1f, 1f, 1f)
         pose.popPose()
@@ -761,13 +806,6 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         const val BACK_C1 = 1.70158f
         const val BACK_C3 = BACK_C1 + 1f
 
-        /**
-         * The two factors a Pokémon model is drawn through, as Cobblemon itself pairs them: a
-         * scale on the pose and a scale in the call. Neither works alone. [MODEL_HEIGHT_UNIT] is
-         * what turns a height in pixels into the second of them.
-         */
-        const val MODEL_POSE_SCALE = 2.5f
-        const val MODEL_HEIGHT_UNIT = 14f
         const val MODEL_TILT = 13f
 
         const val BLACK = 0x000000

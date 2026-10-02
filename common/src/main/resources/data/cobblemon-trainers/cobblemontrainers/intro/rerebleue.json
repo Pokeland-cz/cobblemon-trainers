@@ -51,11 +51,11 @@
     {
       "type": "figure",
       "who": "player",
-      "height": 150,
+      "height": 349,
       "yaw": 22,
       "offset": [
-        -128,
-        0
+        -191,
+        120
       ],
       "from": "left",
       "for": 18
@@ -63,11 +63,11 @@
     {
       "type": "figure",
       "who": "trainer",
-      "height": 150,
+      "height": 349,
       "yaw": -22,
       "offset": [
-        128,
-        0
+        191,
+        120
       ],
       "from": "right",
       "for": 18
@@ -111,6 +111,21 @@
       "at": 18,
       "for": 6,
       "from": "pop"
+    },
+    {
+      "type": "pokemon",
+      "who": "trainer",
+      "slot": 1,
+      "yaw": -35,
+      "tilt": -13,
+      "from": "right",
+      "at": 1,
+      "offset": [
+        240,
+        -118
+      ],
+      "height": 123,
+      "for": 17
     }
   ]
 }
