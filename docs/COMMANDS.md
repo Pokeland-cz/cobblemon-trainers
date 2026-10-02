@@ -8,12 +8,13 @@ un verbe.
 /cobblemontrainers list [<joueur>]
 /cobblemontrainers defeat <id|all> [<joueurs>] [reset]
 /cobblemontrainers debugai
+/cobblemontrainers testintro <intro> [nombre_pokemon] [niveau]
 ```
 
 *This page is also available [in English](en/COMMANDS.md).*
 
 **Le niveau de permission 2 (opérateur) est vérifié une seule fois, sur la racine**, et couvre
-donc les quatre verbes. Un joueur ordinaire ne voit aucun d'eux dans l'autocomplétion : ce qui
+donc tous les verbes. Un joueur ordinaire ne voit aucun d'eux dans l'autocomplétion : ce qui
 lui est destiné, c'est le [Battle Phone](../README.md#le-battle-phone), qui lit la même
 progression sans donner le moindre pouvoir.
 
@@ -23,6 +24,7 @@ progression sans donner le moindre pouvoir.
 | [`list`](#list) | Lit la progression d'un joueur |
 | [`defeat`](#defeat) | Écrit une victoire sans combat |
 | [`debugai`](#debugai) | Montre en chat ce que le mod corrige chez l'IA |
+| [`testintro`](INTROS.md#tester-en-jeu) | Joue une intro sans combat |
 
 ## L'ID d'un dresseur
 
@@ -117,6 +119,7 @@ son équipe - exactement ce qu'aurait fait une vraie victoire.
 
 ```
 /cobblemontrainers debugai
+/cobblemontrainers testintro <intro> [nombre_pokemon] [niveau]
 ```
 
 Un interrupteur. Tant qu'il est actif, chaque décision que le mod refuse à l'IA d'un dresseur

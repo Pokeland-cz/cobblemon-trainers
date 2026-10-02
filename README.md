@@ -73,6 +73,7 @@ Tout passe par une commande unique, `/cobblemontrainers`, et un verbe :
 /cobblemontrainers list [<joueur>]
 /cobblemontrainers defeat <id|all> [<joueurs>] [reset]
 /cobblemontrainers debugai
+/cobblemontrainers testintro <intro> [nombre_pokemon] [niveau]
 ```
 
 Niveau de permission 2 (opérateur), vérifié une fois sur la racine.

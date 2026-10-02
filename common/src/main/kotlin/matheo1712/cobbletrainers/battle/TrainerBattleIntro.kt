@@ -101,6 +101,8 @@ object TrainerBattleIntro {
     }
 
     /** Brings the deadline forward, for a player who has seen enough. */
+    fun isPending(player: ServerPlayer): Boolean = pending.containsKey(player.uuid)
+
     fun skip(player: ServerPlayer) {
         pending[player.uuid]?.ticksLeft = 1
     }
