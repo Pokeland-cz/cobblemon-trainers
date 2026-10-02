@@ -152,7 +152,8 @@ affiché tel quel.
 | --- | --- | --- |
 | `texture` | - | `mon_pack:textures/gui/intro/logo.png`, **obligatoire** |
 | `width` / `height` | taille du fichier | La taille dessinée, en pixels de référence |
-| `color` | `#FFFFFF` | Une teinte appliquée à l'image |
+| `color` | `#FFFFFF` | Teinte : une image blanche prend cette couleur, une image grise conserve ses ombres ; le blanc conserve les couleurs originales |
+| `rotation` | `0` | Rotation en degrés autour du centre de l'image, positive dans le sens horaire, négative dans le sens inverse |
 
 L'image est lue **par le client** : elle vit sous `assets/`, donc le pack va dans `mods/` ou
 double d'un resource pack. C'est la même règle que la musique.

@@ -328,8 +328,10 @@ const SCHEMA = (() => {
              'my_pack:textures/gui/intro/logo.png - read by the client, so under assets/.') },
       { k: 'width', t: 'num', def: null, l: t('Largeur', 'Width') },
       { k: 'height', t: 'num', def: null, l: t('Hauteur', 'Height') },
-      { k: 'color', t: 'color', def: '#FFFFFF', l: t('Teinte', 'Tint'),
-        h: t('Les textures livrées sont blanches, donc teintables.', 'The shipped textures are white, so they take a tint.') }
+      { k: 'color', t: 'color', def: '#FFFFFF', l: t('Couleur de l’image', 'Image colour'),
+        h: t('Une image blanche prend cette couleur, une image grise conserve ses ombres. Le blanc conserve les couleurs originales.', 'A white image takes this colour; a grey image keeps its shading. White preserves the original colours.') },
+      { k: 'rotation', t: 'num', def: 0, step: 1, l: t('Rotation (°)', 'Rotation (°)'),
+        h: t('Autour du centre, dans le sens horaire. Une valeur négative inverse le sens.', 'Around the centre, clockwise. A negative value reverses the direction.') }
     ] },
     vs: { l: t('VS', 'VS'), fields: [
       { k: 'size', t: 'num', def: 1, min: 0.1, step: 0.5, l: t('Taille', 'Size'),
