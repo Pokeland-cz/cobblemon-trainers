@@ -58,7 +58,7 @@ s'ouvre directement - c'est le cas par défaut, et celui de tous les dresseurs d
 | `duration` | `100` | Durée de l'écran, en ticks (20 par seconde), de 20 à 200 |
 | `fadeIn` | `4` | Ticks pendant lesquels l'écran arrive sur le monde |
 | `fadeOut` | `8` | Ticks pendant lesquels il le rend |
-| `layers` | `[]` | Les calques, **dessinés dans l'ordre écrit** : le premier est derrière |
+| `layers` | `[]` | Les calques, dessinés par `z` croissant ; à égalité, le premier écrit est derrière |
 
 La durée appartient à l'intro, pas au dresseur : c'est elle qui sait de combien de temps ses
 calques ont besoin.
@@ -72,6 +72,7 @@ Ces champs valent pour tous les types.
 | `type` | - | `figure`, `text`, `image`, `fill`, `vs`, `team_balls`, `pokemon` |
 | `anchor` | `center` | Le point de l'écran sur lequel le calque pose son **centre** |
 | `offset` | `[0, 0]` | Où il va depuis là, `[x, y]`, en pixels de référence |
+| `z` | `0` | Ordre de superposition entier : plus grand = devant, sans changer la taille du calque |
 | `at` | `0` | Le tick où son entrée commence |
 | `for` | `12` | Combien de ticks elle dure |
 | `from` | `fade` | `left`, `right`, `top`, `bottom`, `fade`, `pop`, `none` |
@@ -79,6 +80,9 @@ Ces champs valent pour tous les types.
 | `alpha` | `1` | Son opacité une fois posé, modèles 3D compris |
 | `sound` | - | Un son joué **une fois**, au tick `at` |
 | `volume` / `pitch` | `1` / `1` | Pour ce son |
+
+Pour placer une image d'ombre derrière le dresseur, donnez-lui `z: 0` et à la `figure` du
+dresseur `z: 1`. Les calques sans `z` gardent leur ordre dans le fichier.
 
 `from` décide de l'entrée : les quatre côtés font glisser le calque depuis le hors-champ,
 `fade` le fait apparaître, `pop` le fait grossir jusqu'à sa taille en la dépassant un peu, et
@@ -290,10 +294,12 @@ L'ancre tombe sur les **vrais** bords de la fenêtre, sans mise à l'échelle : 
 Tout se compte en ticks, 20 par seconde, depuis le lever de l'écran.
 
 - `at` est le moment où un calque commence à entrer, `for` la durée de cette entrée.
-- La **sortie est commune** : `fadeOut` fond tous les calques, modèles 3D compris.
+- La **sortie est commune** : `fadeOut` fond la scène entière en une seule image, modèles 3D
+  compris. Tous les calques disparaissent ensemble, sans révéler ceux qui sont derrière.
 - Le joueur peut passer l'écran **une fois la dernière entrée finie** - le plus grand
   `at + for` de tous les calques. Avant, rien ne répond : une touche maintenue se répète, et
   personne ne doit sauter un écran qu'il n'a pas vu.
+  Passer déclenche le même fondu avant de fermer l'écran ; un fondu déjà commencé se termine normalement.
 - La musique de combat du dresseur part au lever de l'écran, pas au premier tour.
 
 ## Les sons

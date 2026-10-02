@@ -272,6 +272,8 @@ const SCHEMA = (() => {
       ] },
     { k: 'offset', t: 'offset', l: t('Décalage', 'Offset'),
       h: t('En pixels de 640 x 360.', 'In pixels of 640 x 360.') },
+    { k: 'z', t: 'num', def: 0, l: t('Profondeur Z', 'Z order'),
+      h: t('Plus grand = devant. À Z égal, l’ordre des calques décide.', 'Larger = in front. Equal Z keeps layer order.') },
   ];
 
   const LAYER_TIME = [
