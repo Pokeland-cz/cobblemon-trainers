@@ -2,8 +2,11 @@ package matheo1712.cobbletrainers.trainers
 
 import matheo1712.cobbletrainers.CobblemonTrainers
 import net.minecraft.ChatFormatting
-import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.resources.ResourceLocation
+import com.mojang.brigadier.StringReader
+import com.mojang.brigadier.exceptions.CommandSyntaxException
+import net.minecraft.commands.arguments.item.ItemInput
+import net.minecraft.commands.arguments.item.ItemParser
+import net.minecraft.core.HolderLookup
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 
@@ -33,7 +36,7 @@ object TrainerRewards {
     fun grant(player: ServerPlayer, rewards: List<TrainerReward>, firstWin: Boolean) {
         for (reward in rewards) {
             if (!isDue(reward, firstWin)) continue
-            val stack = toStack(reward, complain = true) ?: continue
+            val stack = toStack(reward, player.registryAccess(), complain = true) ?: continue
 
             // Read before giving: `placeItemBackInInventory` splits the stack until nothing is
             // left of it, so afterwards the count is 0 and the item is air.
@@ -70,9 +73,9 @@ object TrainerRewards {
      * @param firstWin Whether the player has yet to beat this trainer. It is what decides
      *   whether a [TrainerReward.firstWinOnly] entry is still owed or already claimed.
      */
-    fun preview(rewards: List<TrainerReward>, firstWin: Boolean): List<RewardPreview> =
+    fun preview(rewards: List<TrainerReward>, registries: HolderLookup.Provider, firstWin: Boolean): List<RewardPreview> =
         rewards.filter { !it.hidden }.mapNotNull { reward ->
-            toStack(reward, complain = false)?.let {
+            toStack(reward, registries, complain = false)?.let {
                 RewardPreview(it, once = reward.firstWinOnly, due = isDue(reward, firstWin))
             }
         }
@@ -91,7 +94,7 @@ object TrainerRewards {
      * @param complain Whether to say so in the log. True when handing rewards over, false when
      *   merely showing them.
      */
-    private fun toStack(reward: TrainerReward, complain: Boolean): ItemStack? {
+    private fun toStack(reward: TrainerReward, registries: HolderLookup.Provider, complain: Boolean): ItemStack? {
         // Caught before parsing: an empty ID yields the valid-but-meaningless `minecraft:`,
         // whose "unknown item" message would send the author looking in the wrong place.
         if (reward.item.isBlank()) {
@@ -99,26 +102,25 @@ object TrainerRewards {
             return null
         }
 
-        val id = ResourceLocation.tryParse(reward.item)
-        if (id == null) {
-            if (complain) LOGGER.warn("Invalid reward item ID '{}'", reward.item)
-            return null
-        }
-
-        val item = BuiltInRegistries.ITEM.getOptional(id).orElse(null)
-        if (item == null) {
-            if (complain) {
-                LOGGER.warn("Unknown reward item '{}' - is the mod that provides it installed?", id)
-            }
-            return null
-        }
-
         val count = reward.count.coerceIn(1, MAX_COUNT)
         if (count != reward.count && complain) {
-            LOGGER.warn("Reward count {} for '{}' is out of range, using {}", reward.count, id, count)
+            LOGGER.warn("Reward count {} for '{}' is out of range, using {}", reward.count, reward.item, count)
         }
 
-        return ItemStack(item, count)
+        return try {
+            // Use the server's registries for components such as enchantments and potions.
+            val reader = StringReader(reward.item.trim())
+            val parsed = ItemParser(registries).parse(reader)
+            // The command parser stops after one item; a reward must consume the whole field.
+            if (reader.canRead()) {
+                throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherUnknownArgument().createWithContext(reader)
+            }
+            // Inventory insertion splits large rewards according to the stack's components.
+            ItemInput(parsed.item(), parsed.components()).createItemStack(count, false)
+        } catch (exception: CommandSyntaxException) {
+            if (complain) LOGGER.warn("Invalid reward item '{}': {}", reward.item, exception.message)
+            null
+        }
     }
 }
 

@@ -99,7 +99,7 @@ object BattlePhoneNetworking {
                 // Through the same resolution that hands them over, so the fiche can never
                 // advertise a reward the player would not actually receive - which is also why
                 // it is told whether beating this trainer would still be a first win.
-                rewards = TrainerRewards.preview(definition.rewards, firstWin = !defeated)
+                rewards = TrainerRewards.preview(definition.rewards, player.registryAccess(), firstWin = !defeated)
             )
         }
 

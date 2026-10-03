@@ -3,7 +3,7 @@ package matheo1712.cobbletrainers.trainers
 /**
  * One item handed to the player when they beat the trainer.
  *
- * @param item Full item ID, namespace included: `cobblemon:rare_candy`, `minecraft:diamond`.
+ * @param item Item ID with optional components, using the item argument syntax of `/give`.
  * @param count How many of it. Clamped to a sane range by [TrainerRewards].
  * @param hidden Whether the battle phone keeps quiet about it. False by default - a reward is
  *   the reason to challenge a trainer, so it is worth advertising. Set it to true for a surprise

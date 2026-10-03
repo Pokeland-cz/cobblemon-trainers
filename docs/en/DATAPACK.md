@@ -371,14 +371,24 @@ beat to spawn them again does not reset anything.
 
 | Field | Default | What it does |
 | --- | --- | --- |
-| `item` | - | Full ID, **namespace required** |
+| `item` | - | Full ID, with optional components in `[]` as in `/give` in 1.21.1; without the command or count |
 | `count` | `1` | How many, clamped to 1-6400 |
 | `hidden` | `false` | Keep it off the Battle Phone |
 | `firstWinOnly` | `false` | Only drop on this player's first win |
 
 Items go to the inventory, whatever does not fit drops at the player's feet, and every item
-received is announced in the chat. An item that cannot be found is skipped with a warning, the
+received is announced in the chat. An unknown item or invalid components are skipped with a warning, the
 others are handed over all the same.
+
+Example of a named badge; the name's quotes are escaped for the trainer JSON:
+
+```json
+"rewards": [{
+  "item": "minecraft:honeycomb[custom_name='{\"text\":\"Hive Badge\",\"color\":\"gold\",\"bold\":true}']",
+  "count": 1,
+  "firstWinOnly": true
+}]
+```
 
 **The Battle Phone shows the rewards on a trainer's page**, even before they have been beaten:
 unlike their team, a reward is the reason to try. `hidden` takes a line off that display without

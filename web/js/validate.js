@@ -129,7 +129,9 @@ const Validate = (() => {
     }
 
     (doc.rewards || []).forEach((reward, index) => {
-      if (!reward.item || !NAMESPACED.test(reward.item)) {
+      // Component values belong to Minecraft's parser; only check the item ID here.
+      const itemId = typeof reward.item === 'string' ? reward.item.trim().split('[', 1)[0] : '';
+      if (!NAMESPACED.test(itemId)) {
         say(found, 'error',
           'Récompense #' + (index + 1) + ' : il faut un ID complet, namespace obligatoire.',
           'Reward #' + (index + 1) + ': a full id is required, namespace included.');
