@@ -78,9 +78,11 @@ object TrainerSpawner {
         //    is how the definition is found again after a restart.
         npc.appliedAspects.add(CobblemonTrainers.TRAINER_ASPECT_PREFIX + trainerId)
         npc.appliedAspects.addAll(extraAspects)
-        // Keep every trainer on the Steve rig until a configured skin successfully replaces it.
-        // This also gives trainers with an unavailable skin a deterministic default appearance.
-        npc.appliedAspects.add("model-default")
+        // A custom resolver owns its geometry, texture and pose. Do not impose player-rig
+        // aspects on it, and never change the NPC class shared by all trainers.
+        val modelId = definition.skin.modelId()
+        if (modelId == null) npc.appliedAspects.add("model-default")
+        else npc.appliedAspects.addAll(definition.skin.modelAspects())
 
         // 5. Battle AI difficulty, overridden per entity so every trainer can differ while
         //    sharing one NPC class. Cobblemon clamps it to 0..5 anyway.
@@ -89,13 +91,15 @@ object TrainerSpawner {
         // 6. initialize() resets `party` to whatever the NPC class provides, so the trainer
         //    team has to be assigned afterwards.
         npc.initialize(definition.battle.level)
+        // Cobblemon synchronizes this override and persists it as ForcedResourceIdentifier.
+        if (modelId != null) npc.forcedResourceIdentifier = modelId
 
         applyTeam(npc, definition, trainerId)
         TrainerOutfit.dress(npc, definition.cosmetics)
         npc.updateAspects()
 
         // 7. The skin arrives asynchronously, after the entity is spawned.
-        applySkin(server, npc, definition.skin)
+        if (modelId == null) applySkin(server, npc, definition.skin)
 
         if (!level.addFreshEntity(npc)) {
             LOGGER.error("Failed to spawn trainer {}", trainerId)

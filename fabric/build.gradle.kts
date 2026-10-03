@@ -204,8 +204,15 @@ val copyExamplePack = tasks.register<Sync>("copyExamplePack") {
 	into(layout.projectDirectory.dir("run/mods/cobblemonrlm"))
 }
 
-tasks.named("runClient") { dependsOn(copyDevMods, copyExamplePack) }
-tasks.named("runServer") { dependsOn(copyDevMods, copyExamplePack) }
+val copyCustomModelExamplePack = tasks.register<Sync>("copyCustomModelExamplePack") {
+	description = "Lays the custom model example into run/mods, for the dev game."
+	group = "fabric"
+	from(rootProject.layout.projectDirectory.dir("examples/custom_model"))
+	into(layout.projectDirectory.dir("run/mods/custom_model"))
+}
+
+tasks.named("runClient") { dependsOn(copyDevMods, copyExamplePack, copyCustomModelExamplePack) }
+tasks.named("runServer") { dependsOn(copyDevMods, copyExamplePack, copyCustomModelExamplePack) }
 
 tasks.processResources {
 	val version = version

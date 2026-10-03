@@ -1,0 +1,20 @@
+{
+  "name": "trainer.custom_model.explorer.name",
+  "skin": {
+    "type": "model",
+    "value": "custom_model:explorer"
+  },
+  "team": [
+    "Eevee\nLevel: 15\nAbility: Run Away\n- Tackle\n- Quick Attack\n- Sand Attack\n- Growl"
+  ],
+  "battle": {
+    "level": 15,
+    "difficulty": 2,
+    "intro": "bw"
+  },
+  "messages": {
+    "greeting": "trainer.custom_model.explorer.greeting",
+    "win": "trainer.custom_model.explorer.win",
+    "lose": "trainer.custom_model.explorer.lose"
+  }
+}

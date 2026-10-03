@@ -148,7 +148,9 @@ object BattlePhoneNetworking {
                     TrainerSkinPayload(
                         trainerId = rawId,
                         model = texture?.model?.name?.lowercase() ?: "default",
-                        texture = texture?.texture ?: ByteArray(0)
+                        texture = texture?.texture ?: ByteArray(0),
+                        modelResource = definition.skin.modelId()?.toString() ?: "",
+                        aspects = definition.skin.modelAspects().toList()
                     )
                 )
             }
@@ -391,12 +393,15 @@ data class RequestTrainerSkinPayload(val trainerId: String) : CustomPacketPayloa
  *
  * The bytes travel rather than a path, for the same reason `NPC_PLAYER_TEXTURE` carries them:
  * a texture shipped in a pack installed on the server alone still shows up on every client.
- * An empty array means the trainer has no resolvable skin - the screen draws a placeholder.
+ * A custom model sends its resolver ID and aspects instead of player PNG bytes. Its assets
+ * are loaded from client resource packs. An empty array without a model means a placeholder.
  */
 data class TrainerSkinPayload(
     val trainerId: String,
     val model: String,
-    val texture: ByteArray
+    val texture: ByteArray,
+    val modelResource: String = "",
+    val aspects: List<String> = emptyList()
 ) : CustomPacketPayload {
 
     override fun type(): CustomPacketPayload.Type<TrainerSkinPayload> = TYPE
@@ -406,15 +411,18 @@ data class TrainerSkinPayload(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is TrainerSkinPayload) return false
-        return trainerId == other.trainerId && model == other.model && texture.contentEquals(other.texture)
+        return trainerId == other.trainerId && model == other.model && texture.contentEquals(other.texture) &&
+            modelResource == other.modelResource && aspects == other.aspects
     }
 
     override fun hashCode(): Int =
-        31 * (31 * trainerId.hashCode() + model.hashCode()) + texture.contentHashCode()
+        31 * (31 * (31 * (31 * trainerId.hashCode() + model.hashCode()) + texture.contentHashCode()) +
+            modelResource.hashCode()) + aspects.hashCode()
 
     companion object {
         val TYPE: CustomPacketPayload.Type<TrainerSkinPayload> =
-            CustomPacketPayload.Type(CobblemonTrainers.id("trainer_skin"))
+            // Keep clients using the old PNG-only codec from decoding model metadata as bytes.
+            CustomPacketPayload.Type(CobblemonTrainers.id("trainer_skin_v2"))
 
         val CODEC: StreamCodec<RegistryFriendlyByteBuf, TrainerSkinPayload> =
             CustomPacketPayload.codec(
@@ -422,12 +430,16 @@ data class TrainerSkinPayload(
                     buf.writeUtf(payload.trainerId)
                     buf.writeUtf(payload.model)
                     buf.writeByteArray(payload.texture)
+                    buf.writeUtf(payload.modelResource)
+                    buf.writeCollection(payload.aspects) { buffer, aspect -> buffer.writeUtf(aspect) }
                 },
                 { buf ->
                     TrainerSkinPayload(
                         trainerId = buf.readUtf(),
                         model = buf.readUtf(),
-                        texture = buf.readByteArray()
+                        texture = buf.readByteArray(),
+                        modelResource = buf.readUtf(),
+                        aspects = buf.readList { it.readUtf() }
                     )
                 }
             )

@@ -27,15 +27,19 @@ const SCHEMA = (() => {
           ['', t('Aucun (Steve)', 'None (Steve)')],
           ['player_username', t('Pseudo de joueur', 'Player username')],
           ['player_uuid', t('UUID de joueur', 'Player UUID')],
-          ['texture', t('Image du pack', 'Pack texture')]
+          ['texture', t('Image du pack', 'Pack texture')],
+          ['model', t('Modèle personnalisé', 'Custom model')]
         ] },
       { k: 'value', t: 'str', def: '', l: t('Valeur', 'Value'),
-        h: t('Un pseudo, un UUID, ou mon_pack:textures/trainers/red.png',
-             'A username, a UUID, or my_pack:textures/trainers/red.png') },
+        h: t('Un pseudo, un UUID, une image (mon_pack:textures/trainers/red.png) ou un modèle NPC (mon_pack:red).',
+             'A username, a UUID, an image (my_pack:textures/trainers/red.png) or an NPC model (my_pack:red).') },
       { k: 'model', t: 'sel', def: 'default', l: t('Gabarit', 'Model'),
         h: t('Seulement pour type: texture - un profil Mojang le dit lui-même.',
              'For type: texture only - a Mojang profile says so itself.'),
-        options: [['default', t('Steve', 'Steve')], ['slim', t('Alex (slim)', 'Alex (slim)')]] }
+        options: [['default', t('Steve', 'Steve')], ['slim', t('Alex (slim)', 'Alex (slim)')]] },
+      { k: 'aspects', t: 'strlist', def: [], l: t('Variantes du modèle', 'Model variants'),
+        h: t('Seulement pour type: model. Aspects du resolver, par exemple winter ; lettres minuscules, chiffres, _ et -. Les assets du modèle doivent être installés côté client.',
+             'For type: model only. Resolver aspects, e.g. winter; lowercase letters, digits, _ and -. Model assets must be installed on the client.') }
     ]
   };
 

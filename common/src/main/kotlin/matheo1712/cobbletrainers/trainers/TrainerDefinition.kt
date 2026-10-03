@@ -62,10 +62,11 @@ data class TrainerDefinition(
     /**
      * Logs the values that are words rather than numbers and were not recognised. Gson has no
      * opinion on them, so an unnoticed typo would silently pick the default - once at load is
-     * the moment to say so. The skin is left out: it is checked when it is resolved, which is
-     * where the pack path is known.
+     * the moment to say so. Skin images are checked when resolved; model IDs and aspects can
+     * already be checked here without accessing client resources.
      */
     fun validate(id: ResourceLocation) {
+        skin.validate(id)
         battle.validate(id)
         progress.validate(id)
         location?.validate(id)

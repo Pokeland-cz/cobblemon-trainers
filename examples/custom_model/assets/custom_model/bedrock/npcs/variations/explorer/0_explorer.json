@@ -1,0 +1,13 @@
+{
+  "name": "custom_model:explorer",
+  "order": 0,
+  "variations": [
+    {
+      "aspects": [],
+      "model": "custom_model:explorer.geo",
+      "poser": "custom_model:explorer",
+      "texture": "custom_model:textures/npcs/explorer-fixed.png",
+      "layers": []
+    }
+  ]
+}

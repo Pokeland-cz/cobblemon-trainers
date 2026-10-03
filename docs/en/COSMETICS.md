@@ -130,9 +130,11 @@ other five follow their limb.
   neither armour nor a held item on its NPCs.
 - **The trainer has to come from this mod.** A Cobblemon NPC dressed by other means is left
   alone.
-- **The trainer has to be on the player model**, which every trainer of this mod is. An NPC on
-  a model of its own, with differently named bones, is not dressed - rather than have its
-  armour hung on guessed coordinates.
+- **The model must retain the player's bones and proportions** for this mod's outfit:
+  `head`, `torso`, `arm_right`, `arm_left`, `leg_right`, `leg_left`. With `skin.type: model`,
+  a different skeleton does not display this outfit; custom proportions and pivots may
+  misalign it. Cobblemon can still draw the main-hand item if the model provides an `item`
+  locator.
 - **A trinket added after the fact needs the trainer spawned again**, like the rest of the
   outfit: see the `/reload` rule above.
 - **Read the load log.** An item ID that resolves to nothing is named there, with the trainer

@@ -45,6 +45,7 @@ ones from your packs.
 | Paste in a Showdown team | [The team format](DATAPACK.md#the-team-format) |
 | Use a regional form or a fakemon | [The `Aspects:` line](DATAPACK.md#the-aspects-line) |
 | Give a trainer a skin | [Skins](DATAPACK.md#skins) |
+| Use a custom trainer model | [Example pack](../../examples/custom_model/README.en.md) |
 | Put armour or a Poké Ball on one | [Dressing a trainer](COSMETICS.md) |
 | Sort my trainers into a league | [Categories](DATAPACK.md#categories) |
 | Lock a trainer behind another | [Locking a trainer](DATAPACK.md#locking-a-trainer) |

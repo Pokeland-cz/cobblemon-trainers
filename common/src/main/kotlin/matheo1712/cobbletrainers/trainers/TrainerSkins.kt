@@ -49,9 +49,14 @@ object TrainerSkins {
      * the worker thread - anything touching the world has to hop back through
      * [MinecraftServer.execute] itself.
      *
-     * @param consumer called exactly once, with the configured skin or the bundled Steve fallback.
+     * @param consumer called exactly once, with the configured skin or the bundled Steve fallback;
+     *   null for a custom model, whose texture belongs to the client resource pack.
      */
     fun resolveAsync(server: MinecraftServer, skin: TrainerSkin, consumer: (NPCPlayerTexture?) -> Unit) {
+        if (skin.modelId() != null) {
+            consumer(null)
+            return
+        }
         cache[skin]?.let {
             consumer(it.orElse(null))
             return
@@ -77,13 +82,15 @@ object TrainerSkins {
     private fun resolve(server: MinecraftServer, skin: TrainerSkin): NPCPlayerTexture =
         when (skin.type.lowercase()) {
             "texture" -> readPackTexture(skin)
+            // Invalid model IDs have already been reported at datapack load.
+            "model" -> null
 
             "player_username", "player_uuid" ->
                 resolveProfileId(server, skin)?.let { fetchTexture(server, it) }
 
             else -> {
                 LOGGER.warn(
-                    "Unknown skin type '{}'. Use 'player_username', 'player_uuid' or 'texture'.",
+                    "Unknown skin type '{}'. Use 'player_username', 'player_uuid', 'texture' or 'model'.",
                     skin.type
                 )
                 null
