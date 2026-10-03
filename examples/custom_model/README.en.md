@@ -2,7 +2,9 @@
 
 This pack adds **Explorer** (`custom_model:explorer`), with a level 15 Eevee.
 The hat and backpack are part of its Bedrock geometry; its poser and animations belong
-to this pack. Its texture reuses the default skin supplied by the mod.
+to this pack. Its texture reuses the default skin supplied by the mod, with dedicated UV
+areas for the leather hat and backpack, teal band and white buckle. The model uses the
+UV array format expected by Cobblemon 1.8.1.
 The battle uses the `bw` intro, so the model can be checked in the world, in the Battle
 Phone detail view and on the versus screen.
 
@@ -35,9 +37,9 @@ The trainer can also be found and called in the Battle Phone. Battles can be rep
 | `data/custom_model/cobblemontrainers/trainers/explorer.json` | Trainer, skin, team and battle |
 | `assets/custom_model/bedrock/npcs/variations/explorer/0_explorer.json` | Maps the skin ID to geometry, poser and texture |
 | `assets/custom_model/bedrock/npcs/models/explorer.geo.json` | Model to import in Blockbench as Bedrock geometry |
-| `assets/custom_model/textures/npcs/explorer.png` | 64 × 64 texture |
+| `assets/custom_model/textures/npcs/explorer-fixed.png` | 64 × 64 texture with dedicated hat and backpack atlas regions |
 | `assets/custom_model/bedrock/npcs/posers/explorer.json` | Poses and animations triggered by Cobblemon |
-| `assets/custom_model/bedrock/npcs/animations/custom_model_explorer.animation.json` | Idle, wave and defeat |
+| `assets/custom_model/bedrock/npcs/animations/custom_model_explorer.animation.json` | Pose loops and battle actions |
 | `assets/custom_model/lang/` | French / English name and dialogue |
 
 Keep the bone names used by the poser and animations. `skin.value` refers to the resolver's
@@ -47,6 +49,33 @@ NPC class. The hitbox remains player-sized.
 Reload client resources with `F3 + T` after editing assets. For trainer changes, use `/reload`
 and spawn it again. The Battle Phone detail view shows the 3D model; its small thumbnail
 shows `?` because this model has no player-skin face.
+
+## Animations
+
+| Situation | Trigger | Animation |
+| --- | --- | --- |
+| Idle and walking | `STAND` / `WALK`, outside battle | Breathing, arms and legs following actual movement |
+| Waiting in battle | `q.in_battle()` | Wider stance, ready arms and livelier breathing |
+| Sending out a Pokémon | `send_out` | Ball drawn, arm wound back, throw at 1.6 s and recovery |
+| Recall / Pokémon switch | `recall` | Ball extended towards the Pokémon, held during recall, then put away |
+| Attack command | `command` | Arm gesture towards the opponent when the Pokémon uses a move |
+| Trainer victory | `win` | Raised arm and celebration |
+| Trainer defeat | `lose` | Lowered head and bowed torso |
+| Arm swing | `punch_left` / `punch_right` | Cobblemon's procedural animation, if a behaviour makes the NPC strike |
+| Floating / swimming | `FLOAT` / `SWIM`, outside battle | Limb strokes and a forward swimming lean |
+| Sleep | `SLEEP` | Tilted head and slow breathing |
+| Portrait | `PORTRAIT` / `PROFILE` | Idle pose |
+
+The battle actions use the names actually sent by Cobblemon 1.8.1; no additional command
+is needed. The example trainer does not add melee or sleeping behaviours: the corresponding
+poses are available if Cobblemon selects them.
+The `bw` intro remains a versus screen, not an NPC `battle_intro` animation event.
+
+Timelines display `v.actioning_pokemon_ball` at the `item_right` locator: the Ball belongs
+to the Pokémon involved. The throw removes it at 1.5833 s, just before Cobblemon's send-out
+at 1.6 s; recall keeps it until 3.25 s. `ball` and `beam` follow the same arm.
+Each action clears temporary items so it cannot retain the previous action's Ball.
+Keep bone names, locators and `item_right_display_context` consistent.
 
 ## From the repository
 

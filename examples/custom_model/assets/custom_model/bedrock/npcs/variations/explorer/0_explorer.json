@@ -6,7 +6,7 @@
       "aspects": [],
       "model": "custom_model:explorer.geo",
       "poser": "custom_model:explorer",
-      "texture": "custom_model:textures/npcs/explorer.png",
+      "texture": "custom_model:textures/npcs/explorer-fixed.png",
       "layers": []
     }
   ]
