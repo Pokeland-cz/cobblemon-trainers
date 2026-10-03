@@ -397,14 +397,24 @@ qu'on a battu pour le réinvoquer ne remet pas le compteur à zéro.
 
 | Champ | Défaut | Rôle |
 | --- | --- | --- |
-| `item` | - | ID complet, **namespace obligatoire** |
+| `item` | - | ID complet, avec composants facultatifs entre `[]` comme dans `/give` en 1.21.1 ; sans commande ni quantité |
 | `count` | `1` | Combien, ramené dans 1-6400 |
 | `hidden` | `false` | Ne pas l'annoncer dans le Battle Phone |
 | `firstWinOnly` | `false` | Ne tomber qu'à la première victoire de ce joueur |
 
 Les objets partent dans l'inventaire, ce qui n'y tient pas tombe aux pieds du joueur, et chaque
-objet reçu est annoncé dans le chat. Un objet introuvable est ignoré avec un avertissement, les
+objet reçu est annoncé dans le chat. Un objet introuvable ou aux composants invalides est ignoré avec un avertissement, les
 autres sont remis quand même.
+
+Exemple de badge nommé ; les guillemets du nom sont échappés pour le JSON du dresseur :
+
+```json
+"rewards": [{
+  "item": "minecraft:honeycomb[custom_name='{\"text\":\"Hive Badge\",\"color\":\"gold\",\"bold\":true}']",
+  "count": 1,
+  "firstWinOnly": true
+}]
+```
 
 **Le Battle Phone affiche les récompenses sur la fiche du dresseur**, avant même de l'avoir
 battu : contrairement à son équipe, une récompense est la raison d'essayer. `hidden` retire une

@@ -128,7 +128,8 @@ const SCHEMA = (() => {
          'Handed to the winner, and shown on their card before the battle.'),
     fields: [
       { k: 'item', t: 'str', def: '', l: t('Objet', 'Item'),
-        h: t('ID complet, namespace obligatoire.', 'Full id, namespace required.') },
+        h: t('ID complet, avec composants facultatifs comme dans /give : minecraft:diamond[custom_model_data=1]. Quantité dans le champ suivant.',
+             'Full id, with optional components as in /give: minecraft:diamond[custom_model_data=1]. Set the count in the next field.') },
       { k: 'count', t: 'num', def: 1, min: 1, max: 6400, l: t('Quantité', 'Count') },
       { k: 'hidden', t: 'bool', def: false, l: t('Secrète', 'Hidden'),
         h: t('Pas annoncée dans le Battle Phone.', 'Not announced in the Battle Phone.') },
