@@ -8,12 +8,13 @@
     "level": 80,
     "difficulty": 5,
     "music": "cobblemon-trainers:battle_music.b2w2_tournament",
-    "intro": "bw",
+    "intro": "theazertor",
     "gimmicks": [
       "mega"
     ]
   },
   "messages": {
+    "greeting": "trainer.cobblemon-trainers.theazertor.greeting",
     "start": "trainer.cobblemon-trainers.theazertor.battle_start",
     "win": "trainer.cobblemon-trainers.theazertor.win",
     "lose": "trainer.cobblemon-trainers.theazertor.lose"

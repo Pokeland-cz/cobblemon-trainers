@@ -231,6 +231,8 @@ Developed by **Mathéo** ([matheo-1712](https://github.com/matheo-1712)).
 
 [Cobblemon : Mega Trainers](https://modrinth.com/datapack/cobblemon-mega-trainers) → A Cobblemon Trainers datapack featuring one trainer per Mega Evolution from Cobblemon: Mega Showdown by [matheo-1712](https://github.com/matheo-1712)
 
+This is where packs built with the mod will be listed, so you have trainers to fight without writing any. Made one you want listed? Open an issue on GitHub with the link.
+
 ---
 
 Found a bug, or a trainer that won't load? Open an issue on GitHub with your JSON and the

@@ -39,6 +39,7 @@ object TrainerCommands {
                 .then(ListTrainersCommand.node())
                 .then(DefeatTrainerCommand.node())
                 .then(DebugAiCommand.node())
+                .then(TestIntroCommand.node())
         )
     }
 }

@@ -11,6 +11,21 @@ you write it**: the same curves, the same entrances, the same 640 x 360 screen -
 shipped intros open in it as templates. A figure is drawn flat there, a browser having no 3D
 model to pose; everything else is what the game will show.
 
+## Preview in game
+
+`/cobblemontrainers testintro <intro> [pokemon_count] [level]` plays only the scene, without spawning a trainer or starting a battle (permission level 2, run as a player).
+Suggestions list loaded intros; `bw` means `cobblemon-trainers:bw`.
+
+| Option | Value | Default |
+|---|---|---|
+| `pokemon_count` | 0 to 6, filled Poké Balls on both sides and `%team%` | Your party size |
+| `level` | 1 to 100, value of `%level%` | 50 |
+
+Example: `/cobblemontrainers testintro bw 6 80`.
+Both figures use your character; Pokémon layers on both sides use your party. Any requested empty slot displays Dewott, even with a completely empty party. No Pokémon is added to your party.
+Layer sounds play without a battle theme. Closing or skipping the intro never starts a battle. Previewing is refused during a battle or its introduction.
+After editing the datapack, run `/reload` before previewing again.
+
 ## Contents
 
 - [Where it lives](#where-it-lives) · [The file](#the-file) · [A layer](#a-layer)
@@ -58,7 +73,7 @@ default, and what every route trainer wants.
 | `duration` | `100` | How long the screen stays up, in ticks (20 a second), 20 to 200 |
 | `fadeIn` | `4` | Ticks the screen takes to arrive over the world |
 | `fadeOut` | `8` | Ticks it takes to hand it back |
-| `layers` | `[]` | The layers, **drawn in the order written**: the first one is behind |
+| `layers` | `[]` | Layers drawn by increasing `z`; ties keep file order, first behind |
 
 The duration belongs to the intro rather than to the trainer: it is the intro that knows how
 much time its layers need.
@@ -72,6 +87,7 @@ These fields apply to every type.
 | `type` | - | `figure`, `text`, `image`, `fill`, `vs`, `team_balls`, `pokemon` |
 | `anchor` | `center` | Which point of the screen the layer puts its **centre** on |
 | `offset` | `[0, 0]` | Where it goes from there, `[x, y]`, in reference pixels |
+| `z` | `0` | Integer stacking order: larger = in front, without changing the layer's size |
 | `at` | `0` | The tick its entrance starts on |
 | `for` | `12` | How many ticks that entrance lasts |
 | `from` | `fade` | `left`, `right`, `top`, `bottom`, `fade`, `pop`, `none` |
@@ -79,6 +95,9 @@ These fields apply to every type.
 | `alpha` | `1` | Its opacity once it has landed, including 3D models |
 | `sound` | - | A sound played **once**, on tick `at` |
 | `volume` / `pitch` | `1` / `1` | For that sound |
+
+To place a shadow image behind the trainer, give it `z: 0` and the trainer's `figure`
+`z: 1`. Layers without `z` keep their file order.
 
 `from` is the entrance: the four sides slide the layer in from off screen, `fade` brings it up,
 `pop` grows it past its size and settles, and `none` simply puts it there.
@@ -132,7 +151,8 @@ what comes out is shown as it is.
 | --- | --- | --- |
 | `texture` | - | `my_pack:textures/gui/intro/logo.png`, **required** |
 | `width` / `height` | the file's size | The drawn size, in reference pixels |
-| `color` | `#FFFFFF` | A tint laid over the image |
+| `color` | `#FFFFFF` | Tint: a white image takes this colour, a grey image keeps its shading; white preserves the original colours |
+| `rotation` | `0` | Rotation in degrees around the image centre, positive clockwise, negative counterclockwise |
 
 The image is read **by the client**: it lives under `assets/`, so the pack goes in `mods/` or
 doubles as a resource pack. Same rule as the music.
@@ -170,16 +190,34 @@ The row of Poké Balls: it says **how many** Pokémon, never which.
 
 ### `pokemon`
 
-The model of one Pokémon of the trainer's team, as the battle phone draws it - regional form
+The model of one Pokémon of the selected team, as the battle phone draws it - regional form
 and shiny included.
 
 | Field | Default | Role |
 | --- | --- | --- |
+| `who` | `"trainer"` | `trainer` for the opponent, `player` for the player |
 | `slot` | `1` | Which one, from 1 |
-| `height` | `64` | How tall it is drawn, in reference pixels |
-| `yaw` | `0` | How far it is turned |
+| `height` | `64` | Side of the framing square, in reference pixels |
+| `yaw` | `0` | Rotation in degrees; `180` turns the Pokémon around |
+| `tilt` | `0` | Tilt in degrees added to the 13° profile view; `-13` makes it level |
 
-**This shows the team before the battle.** Keep it for the boss whose legendary is the point.
+`anchor` and `offset` place the centre of the square shown in the web editor; `height` sets its side.
+The animated model is centred and fitted into this square after rotation, without distortion:
+its largest projected dimension (width or height) fills the square.
+An empty slot draws nothing. Each Pokémon needs its own layer.
+Only `who: "trainer"` layers request the opponent's team from the server.
+
+Two Pokémon facing each other, to the left and right of the centre:
+
+```json
+[
+  { "type": "pokemon", "who": "player", "slot": 1, "offset": [-140, 0], "height": 100, "yaw": 90, "tilt": -13 },
+  { "type": "pokemon", "who": "trainer", "slot": 1, "offset": [140, 0], "height": 100, "yaw": -90, "tilt": -13 }
+]
+```
+
+Add these layers to the intro's `layers` array.
+**Showing the trainer's Pokémon reveals their team before the battle.** Keep it for the boss whose legendary is the point.
 
 ## The intros that ship
 
@@ -234,9 +272,6 @@ them. All are **white on transparent**: the layer's `color` is what gives them t
 through it (`pop`), and four prismatic shards drop in from four sides at four different
 moments - it is the only one of the eight that refuses symmetry, and that is the point.
 
-**None of the eight uses a `pokemon` layer**, deliberately: the mod never shows a team before
-the battle. The layer is there for the packs that want it, not for us.
-
 An emblem belongs behind its trainer as a watermark - `alpha` around `0.3`, sized 180 to 230 -
 rather than in full light: what has to read is the figure.
 
@@ -272,10 +307,12 @@ corner at any size. `offset` goes from there.
 Everything is counted in ticks, 20 a second, from the moment the screen goes up.
 
 - `at` is when a layer starts coming in, `for` how long that takes.
-- **The exit is shared**: `fadeOut` fades every layer, including 3D models.
+- **The exit is shared**: `fadeOut` fades the entire scene as one image, including 3D models.
+  All layers disappear together without revealing the layers behind them.
 - The player may skip **once the last entrance has landed** - the largest `at + for` of all the
   layers. Before that nothing answers: a held key repeats, and nobody should skip a screen they
   have not seen.
+  Skipping starts the same fade before closing the screen; an ongoing fade finishes normally.
 - The trainer's battle music starts when the screen goes up, not on the first turn.
 
 ## Sounds
@@ -289,6 +326,9 @@ A layer may name a sound, played once as its entrance starts:
 It is a UI sound: it follows the **Master** slider rather than the music one, which already
 carries the battle theme. Like the music, it is named by its `sounds.json` key and therefore
 lives under `assets/`.
+
+All intro sounds stop as soon as the screen closes, including when the intro is skipped
+or the sound is a long music track. The battle theme continues normally.
 
 ## The full example
 

@@ -5,6 +5,12 @@ import matheo1712.cobbletrainers.client.platform.ClientPlatform
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies
 import com.cobblemon.mod.common.client.CobblemonClient
 import com.cobblemon.mod.common.client.gui.drawProfilePokemon
+import com.cobblemon.mod.common.client.gui.ProfileTransformType
+import com.cobblemon.mod.common.client.render.SpriteType
+import com.cobblemon.mod.common.client.render.models.blockbench.repository.VaryingModelRepository
+import com.cobblemon.mod.common.client.render.models.blockbench.repository.RenderContext
+import com.cobblemon.mod.common.entity.PoseType
+import com.mojang.blaze3d.vertex.PoseStack
 import com.cobblemon.mod.common.client.render.models.blockbench.FloatingState
 import com.cobblemon.mod.common.entity.npc.NPCEntity
 import com.cobblemon.mod.common.pokemon.RenderablePokemon
@@ -18,6 +24,7 @@ import matheo1712.cobbletrainers.intro.TrainerIntro
 import matheo1712.cobbletrainers.network.BattleIntroPayload
 import matheo1712.cobbletrainers.network.SkipBattleIntroPayload
 import net.minecraft.Util
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphics
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.screens.inventory.InventoryScreen
@@ -32,6 +39,7 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.item.ItemStack
 import org.joml.Quaternionf
 import org.joml.Vector3f
+import org.lwjgl.opengl.GL11
 
 /**
  * The versus screen: a scene a pack wrote, played over the world while the battle waits.
@@ -42,7 +50,7 @@ import org.joml.Vector3f
  * of the intro, and a player who has seen it before says so with [SkipBattleIntroPayload],
  * which only brings that deadline forward.
  *
- * A scene is a list of layers, drawn in the order written; what each one may say is in
+ * A scene is a list of layers, drawn by increasing Z, then file order; their vocabulary is in
  * [IntroLayer]. Everything here is that vocabulary turned into draw calls, and nothing else -
  * a layer this screen cannot draw was dropped at load, on the server, where a pack author is
  * reading the log.
@@ -84,8 +92,15 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     /** True once the server has been told, or once there is nothing left to tell it. */
     private var done = false
 
+    /** Skipping advances the visual clock to the shared exit, without cutting it short. */
+    private var skippedAt: Long? = null
+    private val orderedLayers = scene.layers.withIndex().sortedBy { it.value.z }
+
     /** One flag per layer: a sound is a moment, not a state. */
     private val soundsPlayed = BooleanArray(scene.layers.size)
+
+    /** Keep the instances so even long tracks stop when this screen leaves. */
+    private val introSounds = mutableListOf<SoundInstance>()
 
     /** Whether the log has already been told that a figure had no model to pose. */
     private var flatWarned = false
@@ -97,8 +112,13 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     /** One animation state per `pokemon` layer, posed for the model it belongs to. */
     private val states = mutableMapOf<Int, FloatingState>()
 
+    private val previewPlaceholder: RenderablePokemon? by lazy {
+        if (intro.preview) PokemonSpecies.getByIdentifier(ResourceLocation.fromNamespaceAndPath("cobblemon", "dewott"))
+            ?.let { RenderablePokemon(it, emptySet()) } else null
+    }
+
     /** The team, when the scene draws it. Resolved once rather than on every frame. */
-    private val party: List<RenderablePokemon> = intro.team.mapNotNull { member ->
+    private val party: List<RenderablePokemon?> = intro.team.map { member ->
         ResourceLocation.tryParse(member.species)
             ?.let { PokemonSpecies.getByIdentifier(it) }
             ?.let { RenderablePokemon(it, member.aspects.toSet()) }
@@ -111,6 +131,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     private var uiScale = 1f
 
     private val modelOpacity = IntroModelOpacity()
+    private val sceneOpacity = IntroModelOpacity()
 
     override fun init() {
         uiScale = minOf(
@@ -127,7 +148,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
     override fun render(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         val progress = progress()
         if (progress >= 1f) {
-            // The battle is opening on the server this very moment: nothing left to skip.
+            if (skippedAt != null && !done && !intro.preview) ClientPlatform.current.send(SkipBattleIntroPayload())
             done = true
             minecraft?.setScreen(null)
             return
@@ -138,29 +159,35 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         // hands it back rather than cutting to it twice.
         val fadeIn = scene.fadeIn.coerceAtLeast(1).toFloat()
         val fadeOut = scene.fadeOut.coerceAtLeast(1).toFloat()
-        // How much of the screen is left: 1 until the fade-out starts, 0 as it ends. It is the
-        // shared fade, including models composited by IntroModelOpacity.
+        // Fade the completed scene once: overlapping layers must not reveal each other
+        // during the exit, and cutout models must follow the exact same curve as images.
         val leaving = 1f - eased((elapsed - (ticks - fadeOut)) / fadeOut)
         val alpha = eased(elapsed / fadeIn) * leaving
         if (alpha <= 0f) return
 
-        scene.layers.forEachIndexed { index, layer ->
-            val entrance = entranceOf(layer, elapsed)
-            if (elapsed < layer.at) return@forEachIndexed
-
-            playSound(index, layer, elapsed)
-            drawLayer(guiGraphics, index, layer, entrance, alpha, partialTick)
+        sceneOpacity.draw(guiGraphics, alpha) {
+            orderedLayers.forEach { (index, layer) ->
+                if (elapsed < layer.at) return@forEach
+                // Inventory models use their own depth offsets. Flush and clear between
+                // layers so those offsets cannot override the pack's stacking order.
+                clearLayerDepth(guiGraphics)
+                playSound(index, layer, elapsed)
+                drawLayer(guiGraphics, index, layer, entranceOf(layer, elapsed), 1f, partialTick)
+            }
+            clearLayerDepth(guiGraphics)
+            if (elapsed >= skipAt) {
+                guiGraphics.drawCenteredString(
+                    font, SKIP_HINT, width / 2,
+                    height - (HINT_MARGIN * uiScale).toInt(), argb(HINT_ALPHA, HINT)
+                )
+            }
         }
+    }
 
-        if (elapsed >= skipAt) {
-            guiGraphics.drawCenteredString(
-                font,
-                SKIP_HINT,
-                width / 2,
-                height - (HINT_MARGIN * uiScale).toInt(),
-                argb(alpha * HINT_ALPHA, HINT)
-            )
-        }
+    private fun clearLayerDepth(graphics: GuiGraphics) {
+        graphics.flush()
+        RenderSystem.depthMask(true)
+        RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX)
     }
 
     /////////////////////////////////////
@@ -412,6 +439,12 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         val drawWidth = (layer.width ?: fileWidth) * uiScale * scale
         val drawHeight = (layer.height ?: fileHeight) * uiScale * scale
         val tint = rgb(layer.color, WHITE)
+        val pose = guiGraphics.pose()
+        pose.pushPose()
+        pose.translate(x, y, 0f)
+        pose.mulPose(Quaternionf().rotateZ(Math.toRadians(
+            (layer.rotation.takeIf { it.isFinite() } ?: 0f).toDouble()
+        ).toFloat()))
 
         guiGraphics.setColor(
             ((tint shr 16) and 0xFF) / 255f,
@@ -427,8 +460,8 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         RenderSystem.defaultBlendFunc()
         guiGraphics.blit(
             texture,
-            (x - drawWidth / 2f).toInt(),
-            (y - drawHeight / 2f).toInt(),
+            (-drawWidth / 2f).toInt(),
+            (-drawHeight / 2f).toInt(),
             drawWidth.toInt(),
             drawHeight.toInt(),
             0f,
@@ -438,13 +471,14 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
             fileWidth,
             fileHeight
         )
+        pose.popPose()
         guiGraphics.setColor(1f, 1f, 1f, 1f)
     }
 
     /** The row of Poké Balls: how many Pokémon, never which. */
     private fun teamBalls(guiGraphics: GuiGraphics, layer: IntroLayer, x: Float, y: Float, scale: Float, alpha: Float) {
         val slots = layer.slots.coerceIn(1, PARTY_SLOTS)
-        val filled = (if (layer.isPlayer) playerParty() else intro.teamSize).coerceIn(0, slots)
+        val filled = (if (intro.preview && intro.teamSize >= 0) intro.teamSize else if (layer.isPlayer || intro.preview) playerParty() else intro.teamSize).coerceIn(0, slots)
 
         val size = BALL_SIZE * layer.size * uiScale * scale
         val gap = layer.gap * uiScale * scale
@@ -485,23 +519,62 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         alpha: Float,
         partialTick: Float
     ) {
-        val member = party.getOrNull(layer.slot - 1) ?: return
+        if (layer.slot !in 1..PARTY_SLOTS) return
+        val member = (if (layer.isPlayer || intro.preview) {
+            runCatching {
+                CobblemonClient.storage.party.get(layer.slot - 1)?.let {
+                    RenderablePokemon(it.species, it.aspects)
+                }
+            }.getOrNull()
+        } else party.getOrNull(layer.slot - 1)) ?: previewPlaceholder
+        if (member == null) return
         val tall = (layer.height ?: POKEMON_HEIGHT) * uiScale * scale
+        if (tall <= 0f) return
         val state = states.getOrPut(index) { FloatingState() }
+        val rotation = Quaternionf().fromEulerXYZDegrees(Vector3f(MODEL_TILT + layer.tilt, layer.yaw, 0f))
+        state.currentAspects = member.aspects
+        val sprite = VaryingModelRepository.getSprite(member.species.resourceIdentifier, state, SpriteType.PROFILE)
+        if (sprite != null) {
+            image(guiGraphics, layer.copy(texture = sprite.toString(), width = layer.height ?: POKEMON_HEIGHT,
+                height = layer.height ?: POKEMON_HEIGHT),
+                x, y, scale, alpha)
+            return
+        }
+        val model = VaryingModelRepository.getPoser(member.species.resourceIdentifier, state)
+        state.currentModel = model
+        state.setPoseToFirstSuitable(PoseType.PROFILE)
+        state.updatePartialTicks(partialTick)
+        val bounds = IntroPokemonBounds()
+        val measuringPose = PoseStack()
+        measuringPose.scale(1f, 1f, -1f)
+        measuringPose.mulPose(rotation)
+        val context = RenderContext()
+        context.put(RenderContext.RENDER_STATE, RenderContext.RenderState.PROFILE)
+        context.put(RenderContext.POSABLE_STATE, state)
+        context.put(RenderContext.DO_QUIRKS, false)
+        model.context = context
+        try {
+            model.applyAnimations(null, state, 0f, 0f, 0f, 0f, 0f)
+            model.rootPart.render(context, measuringPose, bounds, 0, 0, -1)
+        } finally {
+            model.setDefault()
+        }
+        if (!bounds.extent.isFinite() || bounds.extent <= 0f) return
+        val modelScale = tall / bounds.extent
 
         val pose = guiGraphics.pose()
         pose.pushPose()
-        // A model hangs below the point it is translated to, so aim near the top of it.
-        pose.translate(x, y - tall / 2f, 0f)
-        pose.scale(MODEL_POSE_SCALE, MODEL_POSE_SCALE, 1f)
+        // Fit the rotated geometry into the same centred square the web editor displays.
+        pose.translate(x - bounds.centerX * modelScale, y - bounds.centerY * modelScale, 0f)
         guiGraphics.setColor(1f, 1f, 1f, alpha)
         drawProfilePokemon(
             renderablePokemon = member,
             matrixStack = pose,
-            rotation = Quaternionf().fromEulerXYZDegrees(Vector3f(MODEL_TILT, layer.yaw, 0f)),
+            rotation = rotation,
             state = state,
             partialTicks = partialTick,
-            scale = tall / MODEL_HEIGHT_UNIT
+            scale = modelScale,
+            profileTransformType = ProfileTransformType.NONE
         )
         guiGraphics.setColor(1f, 1f, 1f, 1f)
         pose.popPose()
@@ -532,11 +605,14 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         return entity
     }
 
-    /** Gives the trainer their name back, whichever way the screen went away. */
+    /** Releases the intro's sounds and visuals, whichever way the screen went away. */
     override fun removed() {
+        introSounds.forEach { minecraft?.soundManager?.stop(it) }
+        introSounds.clear()
         quietened?.hideNameTag = quietenedWas
         quietened = null
         modelOpacity.close()
+        sceneOpacity.close()
         super.removed()
     }
 
@@ -572,7 +648,7 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
                 ?.let { Component.translatable(it).string }
                 .orEmpty())
             .replace("%level%", intro.level.toString())
-            .replace("%team%", intro.teamSize.toString())
+            .replace("%team%", (if (intro.preview && intro.teamSize < 0) playerParty() else intro.teamSize).toString())
             .replace("%player%", minecraft?.player?.gameProfile?.name.orEmpty())
 
         return Component.translatable(filled)
@@ -612,22 +688,23 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         soundsPlayed[index] = true
         val location = layer.sound?.takeIf { it.isNotBlank() }?.let { ResourceLocation.tryParse(it) } ?: return
 
-        minecraft?.soundManager?.play(
-            SimpleSoundInstance(
-                location,
-                SoundSource.MASTER,
-                layer.volume,
-                layer.pitch,
-                SoundInstance.createUnseededRandom(),
-                false,
-                0,
-                SoundInstance.Attenuation.NONE,
-                0.0,
-                0.0,
-                0.0,
-                true
-            )
+        val soundManager = minecraft?.soundManager ?: return
+        val sound = SimpleSoundInstance(
+            location,
+            SoundSource.MASTER,
+            layer.volume,
+            layer.pitch,
+            SoundInstance.createUnseededRandom(),
+            false,
+            0,
+            SoundInstance.Attenuation.NONE,
+            0.0,
+            0.0,
+            0.0,
+            true
         )
+        introSounds.add(sound)
+        soundManager.play(sound)
     }
 
     /////////////////////////////////////
@@ -705,16 +782,21 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         skip()
     }
 
-    /** Tells the server to get on with it, and steps out of the way. */
+    /** Finish the common fade before telling the server to open the battle. */
     private fun skip() {
-        if (done || progress() * ticks < skipAt) return
+        if (done || skippedAt != null || progress() * ticks < skipAt) return
+        if (progress() * ticks >= ticks - scene.fadeOut.coerceAtLeast(1)) return
 
-        done = true
-        ClientPlatform.current.send(SkipBattleIntroPayload())
-        minecraft?.setScreen(null)
+        skippedAt = Util.getMillis()
     }
 
-    private fun progress(): Float = ((Util.getMillis() - opened) / length).coerceIn(0f, 1f)
+    private fun progress(): Float {
+        val now = Util.getMillis()
+        val elapsed = skippedAt?.let {
+            length - scene.fadeOut.coerceAtLeast(1) * MS_PER_TICK + (now - it)
+        } ?: (now - opened).toFloat()
+        return (elapsed / length).coerceIn(0f, 1f)
+    }
 
     private fun argb(alpha: Float, rgb: Int): Int =
         ((alpha.coerceIn(0f, 1f) * 255f).toInt() shl 24) or rgb
@@ -755,13 +837,6 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
         const val BACK_C1 = 1.70158f
         const val BACK_C3 = BACK_C1 + 1f
 
-        /**
-         * The two factors a Pokémon model is drawn through, as Cobblemon itself pairs them: a
-         * scale on the pose and a scale in the call. Neither works alone. [MODEL_HEIGHT_UNIT] is
-         * what turns a height in pixels into the second of them.
-         */
-        const val MODEL_POSE_SCALE = 2.5f
-        const val MODEL_HEIGHT_UNIT = 14f
         const val MODEL_TILT = 13f
 
         const val BLACK = 0x000000

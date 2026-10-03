@@ -188,8 +188,8 @@ const Stage = (() => {
 
     /** The topmost layer under the pointer - topmost, because that is the one on top. */
     const layerAt = (px, py) => {
-      const list = layers();
-      for (let index = list.length - 1; index >= 0; index -= 1) {
+      const list = Preview.orderedLayers(layers()).reverse();
+      for (const { index } of list) {
         if (state.hidden.has(index)) continue;
         const box = boxOf(index);
         if (!box) continue;
@@ -274,7 +274,9 @@ const Stage = (() => {
 
       // Only a fill and an image have two sizes to give; everything else grows as one, and
       // Shift asks a fill to do the same.
-      if (!kind.free || event.shiftKey) {
+      // Keep the enclosing box's handles on the visible bounds at every angle.
+      const rotatedImage = layer.type === 'image' && (layer.rotation ?? 0) % 360 !== 0;
+      if (!kind.free || event.shiftKey || rotatedImage) {
         const both = one.y ? fh : fw;
         fw = both;
         fh = both;
@@ -284,7 +286,7 @@ const Stage = (() => {
         // Only the axis the handle actually moves is written. Setting both would pin a fill's
         // height to 360 for having pulled its side - the same shape, but no longer the "empty
         // means the whole screen" a pack wrote.
-        const both = event.shiftKey;
+        const both = event.shiftKey || rotatedImage;
         if (one.x || both) layer.width = Math.max(1, Math.round(drag.width * fw));
         if (one.y || both) layer.height = Math.max(1, Math.round(drag.height * fh));
       } else if (kind.height) {

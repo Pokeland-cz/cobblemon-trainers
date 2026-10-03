@@ -1,0 +1,110 @@
+{
+  "duration": 100,
+  "fadeIn": 3,
+  "fadeOut": 8,
+  "layers": [
+    {
+      "type": "image",
+      "texture": "cobblemon-trainers:textures/gui/intro/paint_vs.png",
+      "width": 152,
+      "height": 127,
+      "from": "pop"
+    },
+    {
+      "type": "image",
+      "at": 25,
+      "texture": "cobblemon-trainers:textures/gui/intro/paint_border.png",
+      "width": 320,
+      "height": 122,
+      "offset": [
+        -160,
+        119
+      ],
+      "from": "bottom"
+    },
+    {
+      "type": "image",
+      "at": 55,
+      "texture": "cobblemon-trainers:textures/gui/intro/paint_border2.png",
+      "width": 320,
+      "height": 122,
+      "offset": [
+        160,
+        -119
+      ],
+      "pitch": 0,
+      "from": "top"
+    },
+    {
+      "type": "figure",
+      "from": "right",
+      "at": 50,
+      "for": 15,
+      "offset": [
+        208,
+        -35
+      ],
+      "height": 195,
+      "alpha": 0.2,
+      "yaw": 22
+    },
+    {
+      "type": "figure",
+      "from": "right",
+      "at": 40,
+      "for": 15,
+      "offset": [
+        208,
+        -35
+      ],
+      "height": 195,
+      "yaw": 22
+    },
+    {
+      "type": "figure",
+      "from": "left",
+      "who": "player",
+      "at": 19,
+      "for": 15,
+      "offset": [
+        -207,
+        36
+      ],
+      "height": 195,
+      "alpha": 0.2,
+      "yaw": -22
+    },
+    {
+      "type": "figure",
+      "from": "left",
+      "who": "player",
+      "at": 10,
+      "for": 15,
+      "offset": [
+        -207,
+        36
+      ],
+      "height": 195,
+      "yaw": -22
+    },
+    {
+      "type": "team_balls",
+      "offset": [
+        -154,
+        156
+      ],
+      "size": 3,
+      "who": "player",
+      "at": 25
+    },
+    {
+      "type": "team_balls",
+      "offset": [
+        155,
+        -156
+      ],
+      "size": 3,
+      "at": 55
+    }
+  ]
+}

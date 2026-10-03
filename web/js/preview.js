@@ -189,7 +189,11 @@ const Preview = (() => {
       case 'image': {
         const image = texture(layer.texture);
         const known = image && image !== 'missing' ? image : null;
-        return [layer.width ?? (known ? known.width : 64), layer.height ?? (known ? known.height : 64)];
+        const w = layer.width ?? (known ? known.width : 64);
+        const h = layer.height ?? (known ? known.height : 64);
+        const angle = imageAngle(layer);
+        const c = Math.abs(Math.cos(angle)), s = Math.abs(Math.sin(angle));
+        return [w * c + h * s, w * s + h * c];
       }
       case 'team_balls': {
         const slots = Math.min(Math.max(layer.slots ?? 6, 1), 6);
@@ -225,6 +229,8 @@ const Preview = (() => {
     .replace(/%level%/g, about.level ?? 1)
     .replace(/%team%/g, about.team ?? 0)
     .replace(/%player%/g, about.player || 'RereBleue');
+
+  const imageAngle = (layer) => Number.isFinite(layer.rotation) ? layer.rotation * Math.PI / 180 : 0;
 
   const rgb = (color, fallback) => {
     const text = String(color ?? '').trim().replace('#', '');
@@ -381,7 +387,9 @@ const Preview = (() => {
           ctx.globalAlpha = alpha * 0.5;
           ctx.strokeStyle = rgb(layer.color, '#FFFFFF');
           ctx.setLineDash([4, 4]);
-          ctx.strokeRect(Math.round(x - w / 2), Math.round(y - h / 2), Math.round(w), Math.round(h));
+          ctx.translate(x, y);
+          ctx.rotate(imageAngle(layer));
+          ctx.strokeRect(Math.round(-w / 2), Math.round(-h / 2), Math.round(w), Math.round(h));
           ctx.restore();
         }
         return;
@@ -392,7 +400,9 @@ const Preview = (() => {
       const source = tint.toUpperCase() === '#FFFFFF' ? image : tinted(image, tint);
       ctx.save();
       ctx.globalAlpha = alpha;
-      ctx.drawImage(source, Math.round(x - w / 2), Math.round(y - h / 2), Math.round(w), Math.round(h));
+      ctx.translate(x, y);
+      ctx.rotate(imageAngle(layer));
+      ctx.drawImage(source, Math.round(-w / 2), Math.round(-h / 2), Math.round(w), Math.round(h));
       ctx.restore();
     },
 
@@ -441,6 +451,11 @@ const Preview = (() => {
     }
   };
 
+  const orderedLayers = (layers) => layers.map((layer, index) => ({ layer, index }))
+    .sort((a, b) => (a.layer.z ?? 0) - (b.layer.z ?? 0));
+
+  const sceneBuffers = new WeakMap();
+
   /**
    * One frame of a scene.
    *
@@ -453,11 +468,20 @@ const Preview = (() => {
    */
   const frame = (canvas, scene, elapsed, about, hidden, options) => {
     const layout = Boolean(options && options.layout);
-    const ctx = canvas.getContext('2d');
+    const output = canvas.getContext('2d');
+    output.clearRect(0, 0, WIDTH, HEIGHT);
+    let buffer = sceneBuffers.get(canvas);
+    if (!buffer) {
+      buffer = document.createElement('canvas');
+      buffer.width = WIDTH;
+      buffer.height = HEIGHT;
+      sceneBuffers.set(canvas, buffer);
+    }
+    const ctx = buffer.getContext('2d');
     ctx.imageSmoothingEnabled = false;
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-    const ticks = Math.max(scene.duration ?? 100, 1);
+    const ticks = Math.min(Math.max(scene.duration ?? 100, 20), 200);
     const fadeIn = Math.max(scene.fadeIn ?? 4, 1);
     const fadeOut = Math.max(scene.fadeOut ?? 8, 1);
     const leaving = layout ? 1 : 1 - eased((elapsed - (ticks - fadeOut)) / fadeOut);
@@ -465,7 +489,7 @@ const Preview = (() => {
     const boxes = [];
     if (screenAlpha <= 0) return boxes;
 
-    (scene.layers || []).forEach((layer, index) => {
+    orderedLayers(scene.layers || []).forEach(({ layer, index }) => {
       if (hidden && hidden.has(index)) return;
       if (!layout && elapsed < (layer.at ?? 0)) return;
       if (!draw[layer.type]) return;
@@ -480,7 +504,7 @@ const Preview = (() => {
 
       let x = restX;
       let y = restY;
-      let alpha = screenAlpha * (layer.alpha ?? 1);
+      let alpha = layer.alpha ?? 1;
       let scale = 1;
 
       switch (layout ? 'none' : (layer.from ?? 'fade')) {
@@ -503,9 +527,15 @@ const Preview = (() => {
       draw[layer.type](ctx, layer, x, y, scale, Math.min(alpha, 1), about);
     });
 
+    // Fade the assembled scene once so overlapping images keep their relative appearance.
+    output.save();
+    output.imageSmoothingEnabled = false;
+    output.globalAlpha = screenAlpha;
+    output.drawImage(buffer, 0, 0);
+    output.restore();
     return boxes;
   };
 
-  return { frame, give, texture, skin, extent, rest, restBox, anchorX, anchorY,
+  return { frame, give, texture, skin, extent, rest, restBox, anchorX, anchorY, orderedLayers,
            WIDTH, HEIGHT, onRepaint: null, drawFlatSkin: figure };
 })();

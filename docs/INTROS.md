@@ -11,6 +11,21 @@ pendant qu'on l'écrit** : mêmes courbes, mêmes entrées, même écran de 640 
 intros livrées s'y ouvrent comme modèles. Une figure y est dessinée à plat, faute de modèle 3D
 dans un navigateur ; tout le reste est ce que le jeu montrera.
 
+## Tester en jeu
+
+`/cobblemontrainers testintro <intro> [nombre_pokemon] [niveau]` joue uniquement la scène, sans créer de dresseur ni lancer de combat (opérateur, niveau 2, depuis un joueur).
+L'ID est complété avec les intros chargées ; `bw` désigne `cobblemon-trainers:bw`.
+
+| Option | Valeur | Par défaut |
+|---|---|---|
+| `nombre_pokemon` | 0 à 6, nombre de Poké Balls remplies des deux côtés et `%team%` | Taille de votre équipe |
+| `niveau` | 1 à 100, valeur de `%level%` | 50 |
+
+Exemple : `/cobblemontrainers testintro bw 6 80`.
+Les deux figures utilisent votre personnage ; les calques Pokémon des deux côtés utilisent votre équipe. Tout emplacement demandé mais vide affiche Mateloutre, même si votre équipe est entièrement vide. Aucun Pokémon n'est ajouté à votre équipe.
+Les sons des calques sont joués, sans thème de combat. La fermeture et le passage de l'intro ne déclenchent aucun combat. Le test est refusé pendant un combat ou son introduction.
+Après une modification du datapack, faites `/reload` avant de relancer la commande.
+
 ## Sommaire
 
 - [Où ça vit](#où-ça-vit) · [Le fichier](#le-fichier) · [Un calque](#un-calque)
@@ -58,7 +73,7 @@ s'ouvre directement - c'est le cas par défaut, et celui de tous les dresseurs d
 | `duration` | `100` | Durée de l'écran, en ticks (20 par seconde), de 20 à 200 |
 | `fadeIn` | `4` | Ticks pendant lesquels l'écran arrive sur le monde |
 | `fadeOut` | `8` | Ticks pendant lesquels il le rend |
-| `layers` | `[]` | Les calques, **dessinés dans l'ordre écrit** : le premier est derrière |
+| `layers` | `[]` | Les calques, dessinés par `z` croissant ; à égalité, le premier écrit est derrière |
 
 La durée appartient à l'intro, pas au dresseur : c'est elle qui sait de combien de temps ses
 calques ont besoin.
@@ -72,6 +87,7 @@ Ces champs valent pour tous les types.
 | `type` | - | `figure`, `text`, `image`, `fill`, `vs`, `team_balls`, `pokemon` |
 | `anchor` | `center` | Le point de l'écran sur lequel le calque pose son **centre** |
 | `offset` | `[0, 0]` | Où il va depuis là, `[x, y]`, en pixels de référence |
+| `z` | `0` | Ordre de superposition entier : plus grand = devant, sans changer la taille du calque |
 | `at` | `0` | Le tick où son entrée commence |
 | `for` | `12` | Combien de ticks elle dure |
 | `from` | `fade` | `left`, `right`, `top`, `bottom`, `fade`, `pop`, `none` |
@@ -79,6 +95,9 @@ Ces champs valent pour tous les types.
 | `alpha` | `1` | Son opacité une fois posé, modèles 3D compris |
 | `sound` | - | Un son joué **une fois**, au tick `at` |
 | `volume` / `pitch` | `1` / `1` | Pour ce son |
+
+Pour placer une image d'ombre derrière le dresseur, donnez-lui `z: 0` et à la `figure` du
+dresseur `z: 1`. Les calques sans `z` gardent leur ordre dans le fichier.
 
 `from` décide de l'entrée : les quatre côtés font glisser le calque depuis le hors-champ,
 `fade` le fait apparaître, `pop` le fait grossir jusqu'à sa taille en la dépassant un peu, et
@@ -133,7 +152,8 @@ affiché tel quel.
 | --- | --- | --- |
 | `texture` | - | `mon_pack:textures/gui/intro/logo.png`, **obligatoire** |
 | `width` / `height` | taille du fichier | La taille dessinée, en pixels de référence |
-| `color` | `#FFFFFF` | Une teinte appliquée à l'image |
+| `color` | `#FFFFFF` | Teinte : une image blanche prend cette couleur, une image grise conserve ses ombres ; le blanc conserve les couleurs originales |
+| `rotation` | `0` | Rotation en degrés autour du centre de l'image, positive dans le sens horaire, négative dans le sens inverse |
 
 L'image est lue **par le client** : elle vit sous `assets/`, donc le pack va dans `mods/` ou
 double d'un resource pack. C'est la même règle que la musique.
@@ -171,16 +191,34 @@ La rangée de Poké Balls : elle dit **combien** de Pokémon, jamais lesquels.
 
 ### `pokemon`
 
-Le modèle d'un Pokémon de l'équipe du dresseur, comme dans la fiche du Battle Phone - forme
+Le modèle d'un Pokémon de l'équipe choisie, comme dans la fiche du Battle Phone - forme
 régionale et chromatique comprises.
 
 | Champ | Défaut | Rôle |
 | --- | --- | --- |
+| `who` | `"trainer"` | `trainer` pour le dresseur adverse, `player` pour le joueur |
 | `slot` | `1` | Le rang dans l'équipe, à partir de 1 |
-| `height` | `64` | Sa hauteur, en pixels de référence |
-| `yaw` | `0` | De combien il est tourné |
+| `height` | `64` | Côté du carré de cadrage, en pixels de référence |
+| `yaw` | `0` | Rotation en degrés ; `180` retourne le Pokémon |
+| `tilt` | `0` | Inclinaison en degrés ajoutée à la vue de profil de 13° ; `-13` la remet à plat |
 
-**Ça montre l'équipe avant le combat.** À réserver au boss dont le légendaire est l'argument.
+`anchor` et `offset` placent le centre du carré montré par l'éditeur web ; `height` règle son côté.
+Le modèle animé est centré et ajusté dans ce carré après rotation, sans déformation :
+sa plus grande dimension projetée (largeur ou hauteur) remplit le carré.
+Un emplacement vide ne dessine rien. Chaque Pokémon demande son propre calque.
+Seuls les calques `who: "trainer"` demandent l'équipe adverse au serveur.
+
+Exemple de deux Pokémon face à face, à gauche et à droite du centre :
+
+```json
+[
+  { "type": "pokemon", "who": "player", "slot": 1, "offset": [-140, 0], "height": 100, "yaw": 90, "tilt": -13 },
+  { "type": "pokemon", "who": "trainer", "slot": 1, "offset": [140, 0], "height": 100, "yaw": -90, "tilt": -13 }
+]
+```
+
+Ces calques s'ajoutent au tableau `layers` de l'intro.
+**Afficher le dresseur révèle son équipe avant le combat.** À réserver au boss dont le légendaire est l'argument.
 
 ## Les intros livrées
 
@@ -237,9 +275,6 @@ leur donne leur teinte.
 elle en sort (`pop`), et quatre éclats prismatiques tombent des quatre côtés à quatre moments
 différents - c'est la seule des huit qui refuse la symétrie, et c'est le sujet.
 
-**Aucune des huit ne pose de calque `pokemon`**, et c'est voulu : le mod ne montre jamais une
-équipe avant le combat. Le calque existe pour les packs qui le veulent, pas pour nous.
-
 Un emblème se pose en filigrane derrière son dresseur - `alpha` autour de `0.3`, taille de 180
 à 230 - plutôt qu'en pleine lumière : ce qui doit se lire, c'est la figure.
 
@@ -275,10 +310,12 @@ L'ancre tombe sur les **vrais** bords de la fenêtre, sans mise à l'échelle : 
 Tout se compte en ticks, 20 par seconde, depuis le lever de l'écran.
 
 - `at` est le moment où un calque commence à entrer, `for` la durée de cette entrée.
-- La **sortie est commune** : `fadeOut` fond tous les calques, modèles 3D compris.
+- La **sortie est commune** : `fadeOut` fond la scène entière en une seule image, modèles 3D
+  compris. Tous les calques disparaissent ensemble, sans révéler ceux qui sont derrière.
 - Le joueur peut passer l'écran **une fois la dernière entrée finie** - le plus grand
   `at + for` de tous les calques. Avant, rien ne répond : une touche maintenue se répète, et
   personne ne doit sauter un écran qu'il n'a pas vu.
+  Passer déclenche le même fondu avant de fermer l'écran ; un fondu déjà commencé se termine normalement.
 - La musique de combat du dresseur part au lever de l'écran, pas au premier tour.
 
 ## Les sons
@@ -292,6 +329,9 @@ Un calque peut nommer un son, joué une fois quand son entrée commence :
 C'est un son d'interface : il suit le curseur **Principal**, pas celui de la musique, qui porte
 déjà le thème de combat. Comme la musique, il est nommé par sa clé de `sounds.json` et vit donc
 sous `assets/`.
+
+Tous les sons de l'intro s'arrêtent dès que l'écran se ferme, y compris si on passe l'intro
+ou si le son est une longue musique. Le thème de combat continue normalement.
 
 ## L'exemple complet
 

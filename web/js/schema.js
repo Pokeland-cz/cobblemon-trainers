@@ -272,6 +272,8 @@ const SCHEMA = (() => {
       ] },
     { k: 'offset', t: 'offset', l: t('Décalage', 'Offset'),
       h: t('En pixels de 640 x 360.', 'In pixels of 640 x 360.') },
+    { k: 'z', t: 'num', def: 0, l: t('Profondeur Z', 'Z order'),
+      h: t('Plus grand = devant. À Z égal, l’ordre des calques décide.', 'Larger = in front. Equal Z keeps layer order.') },
   ];
 
   const LAYER_TIME = [
@@ -326,8 +328,10 @@ const SCHEMA = (() => {
              'my_pack:textures/gui/intro/logo.png - read by the client, so under assets/.') },
       { k: 'width', t: 'num', def: null, l: t('Largeur', 'Width') },
       { k: 'height', t: 'num', def: null, l: t('Hauteur', 'Height') },
-      { k: 'color', t: 'color', def: '#FFFFFF', l: t('Teinte', 'Tint'),
-        h: t('Les textures livrées sont blanches, donc teintables.', 'The shipped textures are white, so they take a tint.') }
+      { k: 'color', t: 'color', def: '#FFFFFF', l: t('Couleur de l’image', 'Image colour'),
+        h: t('Une image blanche prend cette couleur, une image grise conserve ses ombres. Le blanc conserve les couleurs originales.', 'A white image takes this colour; a grey image keeps its shading. White preserves the original colours.') },
+      { k: 'rotation', t: 'num', def: 0, step: 1, l: t('Rotation (°)', 'Rotation (°)'),
+        h: t('Autour du centre, dans le sens horaire. Une valeur négative inverse le sens.', 'Around the centre, clockwise. A negative value reverses the direction.') }
     ] },
     vs: { l: t('VS', 'VS'), fields: [
       { k: 'size', t: 'num', def: 1, min: 0.1, step: 0.5, l: t('Taille', 'Size'),
@@ -342,9 +346,13 @@ const SCHEMA = (() => {
       { k: 'empty', t: 'bool', def: true, l: t('Montrer les vides', 'Show the empty ones') }
     ] },
     pokemon: { l: t('Pokémon', 'Pokémon'), fields: [
+      WHO,
       { k: 'slot', t: 'num', def: 1, min: 1, max: 6, l: t('Rang dans l’équipe', 'Party slot') },
-      { k: 'height', t: 'num', def: 64, l: t('Hauteur', 'Height') },
-      { k: 'yaw', t: 'num', def: 0, l: t('Rotation', 'Yaw') }
+      { k: 'height', t: 'num', def: 64, min: 1, l: t('Taille du cadre', 'Frame size'),
+        h: t('Côté du carré en pixels. Le modèle en jeu est centré et ajusté dedans, sans déformation.',
+             'Square side in pixels. The in-game model is centred and fitted inside without distortion.') },
+      { k: 'yaw', t: 'num', def: 0, l: t('Rotation', 'Yaw'), h: t('En degrés : 180 retourne le Pokémon.', 'In degrees: 180 turns the Pokémon around.') },
+      { k: 'tilt', t: 'num', def: 0, l: t('Inclinaison', 'Tilt'), h: t('En degrés, ajoutés à la vue de profil (13°).', 'In degrees, added to the profile view (13°).') }
     ] }
   };
 
