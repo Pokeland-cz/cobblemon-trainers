@@ -280,6 +280,7 @@ val releaseType = when (providers.gradleProperty("release_type").getOrElse("stab
 // Captured out here on purpose: inside `publishMods`, `version` is the extension's own
 // property, and interpolating it yields its Gradle description rather than the number.
 val modVersion = project.version.toString()
+val publishedVersion = "$modVersion-fabric"
 
 publishMods {
 	// `remapJar`, not `jar`: the latter still carries named mappings and would crash outside a
@@ -289,8 +290,8 @@ publishMods {
 	file = providers.gradleProperty("release_file")
 		.map { rootProject.layout.projectDirectory.file(it) }
 		.orElse(tasks.named<RemapJarTask>("remapJar").flatMap { it.archiveFile })
-	displayName = "$modVersion-fabric"
-	version = modVersion
+	displayName = publishedVersion
+	version = publishedVersion
 	type = releaseType
 	modLoaders.add("fabric")
 

@@ -47,9 +47,9 @@ jobs:
         run: |
           version="${TAG#v}"
 
-          # Everything downstream - the jar name, fabric.mod.json, the Modrinth version number -
-          # is built from this string, so a tag like "latest" has to stop here rather than ship a
-          # jar named after it.
+          # Everything downstream - the jar name, fabric.mod.json, and the base of each
+          # loader-specific Modrinth version number - is built from this string, so a tag like
+          # "latest" has to stop here rather than ship a jar named after it.
           if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.+-]+)?$ ]]; then
             echo "::error::tag $TAG does not carry a version number (expected something like v1.2.3)"
             exit 1
