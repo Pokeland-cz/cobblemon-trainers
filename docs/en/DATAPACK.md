@@ -544,10 +544,11 @@ Level: 80
 "skin": { "type": "player_username", "value": "RereBleue" }
 "skin": { "type": "player_uuid",     "value": "4199c666-1193-49b6-8986-099d872d5adf" }
 "skin": { "type": "texture",         "value": "my_pack:textures/trainers/red.png", "model": "slim" }
+"skin": { "type": "model",           "value": "my_pack:red", "aspects": ["winter"] }
 ```
 
 The first two download the skin from the Mojang API when the trainer spawns: they need network
-access and an account that exists. Should it fail, whatever the type, the trainer keeps the
+access and an account that exists. If an image cannot be resolved, the trainer keeps the
 default skin and the reason is in the log.
 
 `texture` takes the full path under `assets/`, namespace first and `.png` included:
@@ -564,6 +565,55 @@ That route has two particularities:
 
 If you have no image of your own, the mod ships one to try it with:
 `cobblemon-trainers:textures/trainers/example.png`.
+
+`model` selects a **Cobblemon NPC model**, including its geometry, texture and animations.
+The hitbox remains player-sized.
+`value` is the `name` of its variation resolver, not a `.geo.json` file or an NPC class.
+To try a model already supplied by Cobblemon: `"skin": { "type": "model", "value": "cobblemon:sacchi" }`.
+A [complete example pack](../../examples/custom_model/README.en.md) supplies an explorer with
+its model, texture and animations; `customModelExampleDatapack` produces its ZIP.
+
+| Field for `type: model` | Default | Role |
+| --- | --- | --- |
+| `value` | — | Full resolver ID, such as `my_pack:red` |
+| `aspects` | `[]` | Resolver variants; lowercase words, digits, `_` and `-`, without `:` |
+| `model` | ignored | `default` / `slim` only applies to the `texture` type |
+
+The **assets must be installed on every client**, in an enabled resource pack or a pack in
+`mods/`; they are not sent like the PNGs of the `texture` type. The server only needs the
+trainer definition. Example resources for `my_pack:red`:
+
+| File under `assets/my_pack/` | Contents |
+| --- | --- |
+| `bedrock/npcs/models/red.geo.json` | Geometry exported in Bedrock format from Blockbench |
+| `textures/npcs/red.png` | Texture matching the model's UVs |
+| `bedrock/npcs/variations/red/0_red.json` | Resolver below |
+| `bedrock/npcs/posers/red.json` | Custom Cobblemon poser, if the standard animations do not fit |
+| `bedrock/npcs/animations/red.animation.json` | Bedrock animations referenced by that poser, if needed |
+
+```json
+{
+  "name": "my_pack:red",
+  "order": 0,
+  "variations": [{
+    "aspects": [],
+    "model": "my_pack:red.geo",
+    "poser": "cobblemon:standard",
+    "texture": "my_pack:textures/npcs/red.png"
+  }]
+}
+```
+
+The standard poser expects Cobblemon trainer bones; for a different skeleton, use `my_pack:red`
+and provide your own poser. A `.bbmodel` project or a GeckoLib model alone is not enough.
+Variants add entries to `variations` with their `aspects` and the properties to replace.
+A malformed ID uses the default skin with a server warning; missing or incorrect client assets
+use Cobblemon's fallback rendering.
+The choice survives restarts; after editing the definition and running `/reload`, spawn the
+trainer again. The Battle Phone shows the model in its 3D detail view, with `?` in the small
+thumbnail because there is no player skin face. The web editor keeps a silhouette and does not
+create model files: supply them in a separate resource pack.
+For equipment and accessories on this model, see [Cosmetics](COSMETICS.md#if-nothing-shows-up).
 
 ## Battle music
 

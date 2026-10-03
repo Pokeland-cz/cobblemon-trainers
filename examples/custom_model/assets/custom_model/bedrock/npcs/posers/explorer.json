@@ -1,0 +1,18 @@
+{
+  "portraitScale": 2.1,
+  "portraitTranslation": [0, 1.1, 0],
+  "profileScale": 0.9,
+  "profileTranslation": [0, -0.5, 0],
+  "animations": {
+    "send_out": "q.bedrock_primary('custom_model_explorer', 'wave', q.curve('symmetrical'))",
+    "recall": "q.bedrock_primary('custom_model_explorer', 'wave', q.curve('symmetrical'))",
+    "win": "q.bedrock_primary('custom_model_explorer', 'wave', q.curve('symmetrical'))",
+    "lose": "q.bedrock_primary('custom_model_explorer', 'bow', q.curve('symmetrical'))"
+  },
+  "poses": {
+    "standing": {
+      "poseTypes": ["STAND", "WALK", "FLOAT", "SWIM", "PORTRAIT", "PROFILE"],
+      "animations": ["q.look('head')", "q.bedrock('custom_model_explorer', 'idle')"]
+    }
+  }
+}

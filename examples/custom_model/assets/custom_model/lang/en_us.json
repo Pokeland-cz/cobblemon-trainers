@@ -1,0 +1,6 @@
+{
+  "trainer.custom_model.explorer.name": "Explorer",
+  "trainer.custom_model.explorer.greeting": "My backpack is ready for adventure! How about a battle before I leave?",
+  "trainer.custom_model.explorer.win": "Well played! Another lesson to take on my travels.",
+  "trainer.custom_model.explorer.lose": "Every step teaches us something. Try again whenever you like!"
+}

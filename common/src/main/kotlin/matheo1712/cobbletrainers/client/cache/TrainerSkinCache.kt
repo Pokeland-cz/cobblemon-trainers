@@ -37,7 +37,9 @@ object TrainerSkinCache {
         val slim: Boolean,
         val width: Int,
         val height: Int,
-        val bytes: ByteArray?
+        val bytes: ByteArray?,
+        val modelResource: ResourceLocation? = null,
+        val aspects: Set<String> = emptySet()
     )
 
     private val skins = mutableMapOf<String, Skin>()
@@ -65,7 +67,13 @@ object TrainerSkinCache {
     /** Takes in a server answer, turning its bytes into a texture. */
     fun accept(payload: TrainerSkinPayload) {
         pending.remove(payload.trainerId)
-        skins[payload.trainerId] = build(payload)
+        val next = build(payload)
+        val previous = skins.put(payload.trainerId, next)
+        // A model has no dynamic player texture. Release the old image when a reload switches
+        // from a player skin to a model (same-location image replacement is handled by register).
+        previous?.texture?.takeIf { it != next.texture }?.let {
+            Minecraft.getInstance().textureManager.release(it)
+        }
     }
 
     /** Drops every texture. Called when leaving a world: the next one may not have the same packs. */
@@ -78,6 +86,10 @@ object TrainerSkinCache {
 
     private fun build(payload: TrainerSkinPayload): Skin {
         val slim = payload.model.equals("slim", ignoreCase = true)
+        val modelResource = payload.modelResource.takeIf { it.isNotEmpty() }?.let(ResourceLocation::tryParse)
+        if (modelResource != null) {
+            return Skin(null, false, 64, 64, null, modelResource, payload.aspects.toSet())
+        }
         if (payload.texture.isEmpty()) return Skin(null, slim, 64, 64, null)
 
         return try {

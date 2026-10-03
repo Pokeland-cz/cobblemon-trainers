@@ -44,6 +44,7 @@ Phone sous leur propre onglet, à côté de ceux de tes packs.
 | Coller une équipe Showdown | [Le format d'équipe](DATAPACK.md#le-format-déquipe) |
 | Une forme régionale, un fakemon | [La ligne `Aspects:`](DATAPACK.md#la-ligne-aspects) |
 | Donner un skin à un dresseur | [Skins](DATAPACK.md#skins) |
+| Utiliser un modèle de dresseur personnalisé | [Pack d'exemple](../examples/custom_model/README.md) |
 | Lui mettre une armure ou une Poké Ball en main | [Habiller un dresseur](COSMETIQUES.md) |
 | Ranger mes dresseurs en ligue | [Catégories](DATAPACK.md#catégories) |
 | Verrouiller un dresseur derrière un autre | [Conditions pour combattre](DATAPACK.md#conditions-pour-combattre) |

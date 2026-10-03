@@ -573,10 +573,11 @@ mod qui le fournit n'est pas installé.
 "skin": { "type": "player_username", "value": "RereBleue" }
 "skin": { "type": "player_uuid",     "value": "4199c666-1193-49b6-8986-099d872d5adf" }
 "skin": { "type": "texture",         "value": "mon_pack:textures/trainers/red.png", "model": "slim" }
+"skin": { "type": "model",           "value": "mon_pack:red", "aspects": ["winter"] }
 ```
 
 Les deux premiers téléchargent le skin depuis l'API Mojang à l'apparition : il faut un accès
-réseau et un compte existant. En cas d'échec, quel que soit le type, le dresseur garde le skin
+réseau et un compte existant. En cas d'échec de résolution d'une image, le dresseur garde le skin
 par défaut et la raison est dans les logs.
 
 `texture` prend le chemin complet sous `assets/`, namespace en tête et `.png` compris :
@@ -594,6 +595,55 @@ Cette voie a deux particularités :
 
 Sans image à toi, le mod en fournit une pour essayer :
 `cobblemon-trainers:textures/trainers/example.png`.
+
+`model` choisit un **modèle NPC Cobblemon**, avec sa géométrie, sa texture et ses animations.
+La hitbox reste celle d'un joueur.
+`value` est le `name` de son resolver de variations, pas un fichier `.geo.json` ni une classe NPC.
+Pour essayer avec un modèle déjà fourni par Cobblemon : `"skin": { "type": "model", "value": "cobblemon:sacchi" }`.
+Un [pack d'exemple complet](../examples/custom_model/README.md) fournit un explorateur avec
+son modèle, sa texture et ses animations ; `customModelExampleDatapack` en produit le ZIP.
+
+| Champ pour `type: model` | Défaut | Rôle |
+| --- | --- | --- |
+| `value` | — | Identifiant complet du resolver, par exemple `mon_pack:red` |
+| `aspects` | `[]` | Variantes du resolver ; mots en minuscules, chiffres, `_` et `-`, sans `:` |
+| `model` | ignoré | `default` / `slim` ne sert qu'au type `texture` |
+
+Les **assets doivent être installés chez chaque client**, dans un resource pack activé ou un pack
+de `mods/` ; ils ne sont pas envoyés comme les PNG du type `texture`. Le serveur ne reçoit que
+la définition du dresseur. Exemple de ressources pour `mon_pack:red` :
+
+| Fichier sous `assets/mon_pack/` | Contenu |
+| --- | --- |
+| `bedrock/npcs/models/red.geo.json` | Géométrie exportée au format Bedrock depuis Blockbench |
+| `textures/npcs/red.png` | Texture correspondant aux UV du modèle |
+| `bedrock/npcs/variations/red/0_red.json` | Resolver ci-dessous |
+| `bedrock/npcs/posers/red.json` | Poser Cobblemon personnalisé, si les animations standard ne conviennent pas |
+| `bedrock/npcs/animations/red.animation.json` | Animations Bedrock référencées par ce poser, si nécessaire |
+
+```json
+{
+  "name": "mon_pack:red",
+  "order": 0,
+  "variations": [{
+    "aspects": [],
+    "model": "mon_pack:red.geo",
+    "poser": "cobblemon:standard",
+    "texture": "mon_pack:textures/npcs/red.png"
+  }]
+}
+```
+
+Ce poser standard suppose les os du dresseur Cobblemon ; pour un autre squelette, utilise
+`mon_pack:red` et fournis ton poser. Un projet `.bbmodel` ou un modèle GeckoLib seul ne suffit pas.
+Les variantes ajoutent des entrées à `variations` avec leurs `aspects` et les propriétés à remplacer.
+Un identifiant mal formé revient au skin par défaut avec un avertissement serveur ; des assets
+absents ou incorrects côté client passent par le rendu de secours de Cobblemon.
+Le choix est conservé au redémarrage ; après modification de la définition et `/reload`, refais
+apparaître le dresseur. Le Battle Phone affiche le modèle dans sa fiche 3D, avec `?` dans la
+petite vignette faute de visage de skin joueur. L'éditeur web conserve une silhouette et ne crée
+pas les fichiers du modèle : fournis-les dans un resource pack séparé.
+Pour les équipements et accessoires sur ce modèle, voir [Cosmétiques](COSMETIQUES.md#si-rien-ne-saffiche).
 
 ## Musique de combat
 

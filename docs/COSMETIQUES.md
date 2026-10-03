@@ -133,9 +133,11 @@ cinq autres suivent leur membre.
 - **Le mod doit être sur le client aussi.** C'est lui qui dessine tout ça ; Cobblemon ne
   dessine ni armure ni objet tenu sur ses PNJ.
 - **Le dresseur doit venir de ce mod.** Un PNJ Cobblemon habillé autrement n'est pas repris.
-- **Le dresseur doit être sur le modèle de joueur**, celui de tous les dresseurs du mod. Un
-  PNJ sur un modèle à lui, aux os nommés autrement, n'est pas habillé - plutôt que de poser
-  l'armure à des coordonnées devinées.
+- **Le modèle doit conserver les os et les proportions du joueur** pour la tenue du mod :
+  `head`, `torso`, `arm_right`, `arm_left`, `leg_right`, `leg_left`. Avec `skin.type: model`,
+  un squelette différent n'affiche pas cette tenue ; les proportions et pivots personnalisés
+  peuvent la décaler. Cobblemon peut toujours dessiner l'objet en main principale si le modèle
+  fournit un locator `item`.
 - **Un trinket ajouté après coup demande de refaire apparaître le dresseur**, comme le reste
   de la tenue : voir la règle du `/reload` ci-dessus.
 - **Relis le log au chargement.** Un ID d'objet qui ne résout rien y est nommé, avec le
