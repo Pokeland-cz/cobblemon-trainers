@@ -65,17 +65,19 @@ phrases d'un dresseur par des clés et range les phrases dans la première langu
 
 ```bash
 node --test web/tests/*.test.cjs # tests sans npm, Node.js 22 ou ultérieur
+node web/sync-shipped.cjs       # actualise les listes de textures et de sons
 bash web/sync-assets.sh          # remplit web/assets/ depuis le mod
 python -m http.server 8765 -d web
 ```
 
 `sync-assets.sh` **copie depuis le dépôt** le logo et l'icône du mod, les textures d'intro, les
 huit intros livrées et les dresseurs d'exemple, et il **écrit `js/shipped.js`** à partir du
-`sounds.json` du mod : c'est de ses clés que sortent les musiques proposées, donc une piste
-ajoutée au mod est offerte par l'éditeur sans que personne édite une liste. Ce fichier-là est
+`sounds.json` du mod et du dossier `textures/gui/intro/`, via `sync-shipped.cjs` : les menus
+suivent les sons et textures présents, y compris les ajouts, suppressions et sous-dossiers.
+Node.js 22 ou ultérieur est requis pour cette synchronisation. Ce fichier-là est
 commité, contrairement à `assets/` - un `<script>` se charge même depuis le disque, là où un
 `fetch` serait refusé, et la liste des pistes est trop centrale pour manquer dans le montage
-qu'un auteur essaie en premier. Rien de tout ça n'est commité : c'est le workflow `pages.yml` qui rejoue le
+qu'un auteur essaie en premier. Les fichiers copiés sous `assets/` ne sont pas commités : le workflow `pages.yml` rejoue le
 script à la publication, donc une intro qui change dans le mod change dans l'éditeur, et
 l'éditeur ne peut pas décrire une version du mod qui n'existe plus.
 
@@ -91,7 +93,7 @@ que l'éditeur lise par un `fetch`, que le navigateur refuse sur `file://`.
 | `js/validate.js` | Les pièges du mod dits à voix haute - un champ que Gson ignore en silence, un `dynamax` qui s'écrit `max` |
 | `js/preview.js` | `BattleIntroScreen.kt` transcrit : mêmes courbes, mêmes entrées, même 640 × 360 |
 | `js/stage.js` | L'aperçu d'intro rendu manipulable : la sélection, le glisser-déposer, les poignées, l'aimantation et la chronologie |
-| `js/shipped.js` | **Généré** par `sync-assets.sh` depuis le `sounds.json` du mod : les pistes qu'un dresseur peut demander. Ne pas l'éditer à la main |
+| `js/shipped.js` | **Généré** par `sync-shipped.cjs` depuis `sounds.json` et `textures/gui/intro/` du mod : les ressources proposées par l'éditeur. Ne pas l'éditer à la main |
 | `js/assets.js` | Ce qui vit sous `assets/` : les quatre types de fichiers, leur place dans l'archive, la référence qu'ils portent, et le `sounds.json` qui en sort. Les octets vont dans IndexedDB - une piste de trois mégaoctets ne tient pas dans le `localStorage` |
 | `js/pack.js` | Le pack, son arborescence, les deux moitiés de l'archive et la relecture d'un pack existant |
 | `js/app.js` | La mise en page et le câblage |

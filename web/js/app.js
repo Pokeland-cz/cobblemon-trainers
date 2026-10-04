@@ -1712,11 +1712,6 @@ const App = (() => {
     $('lang-en').classList.toggle('on', I18N.lang === 'en');
   };
 
-  const SHIPPED_TEXTURES = ['rays', 'burst', 'slash', 'banner', 'petal', 'shuriken', 'grid',
-    'moon', 'stars', 'scene_manor', 'scene_manor_lights', 'ultra_rift', 'ultra_shard',
-    'crest_rerebleue', 'crest_kagumi', 'crest_griff501', 'crest_octavien29', 'crest_theazertor',
-    'crest_aeliothys'];
-
   /*
    * What every field that names something may be offered, in one place.
    *
@@ -1739,7 +1734,7 @@ const App = (() => {
     skin: () => ({ pack: Pack.references('skin'), mod: [] }),
     texture: () => ({
       pack: Pack.references('intro_texture'),
-      mod: SHIPPED_TEXTURES.map((name) => `cobblemon-trainers:textures/gui/intro/${name}.png`)
+      mod: (typeof SHIPPED !== 'undefined' && SHIPPED.textures) || []
     })
   };
 

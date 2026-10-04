@@ -2020,7 +2020,10 @@ Points à ne pas redécouvrir :
   le disque, là où un `fetch` est refusé, et une première version passée par `fetch` laissait
   le menu vide chez qui ouvre `index.html` sans serveur - c'est-à-dire le montage qu'un auteur
   essaie en premier. Le script échoue bruyamment s'il ne lit aucune clé, plutôt que d'écrire
-  une liste vide.
+  une liste vide. Les textures proposées suivent aussi les fichiers réels de
+  `textures/gui/intro/`, sous-dossiers compris : `web/sync-shipped.cjs` génère les deux listes,
+  et `sync-assets.sh` l'appelle avant la publication. Après un ajout ou une suppression,
+  lancer `node web/sync-shipped.cjs` ; les tests refusent un catalogue commité périmé.
 - **L'éditeur n'écrit que ce qui diffère du défaut.** Le mod remplit les siens ; les réécrire
   ferait du bruit dans le fichier d'un auteur et un second endroit où le défaut vit. `null`
   est l'exception, c'est un choix (`battle.music` muet), pas une absence.

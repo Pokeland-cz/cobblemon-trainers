@@ -45,11 +45,11 @@ jobs:
         with:
           node-version: '22'
 
-      - name: test web editor
-        run: node --test web/tests/*.test.cjs
-
       - name: fill web/assets from the mod
         run: bash web/sync-assets.sh
+
+      - name: test web editor
+        run: node --test web/tests/*.test.cjs
 
       - name: configure pages
         uses: actions/configure-pages@v5
