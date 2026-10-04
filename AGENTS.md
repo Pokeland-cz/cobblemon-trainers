@@ -75,8 +75,9 @@ une page de vente, pas une page du wiki.
 
 Sur Windows, utiliser `.\gradlew.bat`.
 
-Il n'existe pas de source set `src/test` - `build` ne lance donc aucun test.
-Toute vérification passe par `runClient`/`runServer`, dont les mondes vivent dans `fabric/run/`
+Les tests JVM sont dans `common/src/test/kotlin/` et tournent avec `build` ou `:common:test`.
+L'éditeur se teste avec `node --test web/tests/*.test.cjs`, sans dépendance npm.
+Les vérifications en jeu passent par `runClient`/`runServer`, dont les mondes vivent dans `fabric/run/`
 (gitignoré). **Ne pas mettre de jar Cobblemon dans `fabric/run/mods/`** : il est déjà fourni par
 `modImplementation`, et le doublon fait planter le client au démarrage. Mega Showdown et ses
 dépendances, elles, y sont bien - c'est `copyDevMods` qui les y dépose avant chaque `runClient`,

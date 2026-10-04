@@ -53,6 +53,21 @@ use that jar without rebuilding it. The CurseForge script accepts the same path 
 `build/mod-publish/curseforge-<loader>.json` (with `VERSION`, `RELEASE_TYPE` and
 `LOADER=neoforge` for NeoForge).
 
+## Automated tests
+
+`./gradlew :common:test` runs JVM tests without a world or loader. They cover Showdown team
+counting, trainer defaults, areas, NBT progress, rewards, cosmetics, intros, network codecs,
+stat multipliers and model bounds. `build` runs them too; the report lives at
+`common/build/reports/tests/test/index.html`.
+
+`node --test web/tests/*.test.cjs` tests the editor with Node.js 22 or later, without npm:
+imports/exports, assets, translations, validation and preview calculations. Storage and the
+archive interface are simulated; ZIP compression, IndexedDB and actual browser rendering
+still need manual verification. CI runs these tests before the build and Pages deployment.
+
+Full battles, GPU rendering, audio, mixins and loader events still require `runClient`/`runServer`
+on Fabric and NeoForge. Passing JVM tests alone does not validate these integrations.
+
 ## Logic and platform boundary
 
 `TrainerPlatform` defines loader operations: server events, commands, reloads, registries,

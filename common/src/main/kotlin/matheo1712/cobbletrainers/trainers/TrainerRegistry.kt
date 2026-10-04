@@ -227,9 +227,12 @@ object TrainerRegistry {
      * those of one datapack, or only those of one category.
      */
     fun listedIds(namespace: String? = null, category: ResourceLocation? = null): List<ResourceLocation> =
-        listedOrder.map { (id, _) -> id }
-            .filter { namespace == null || it.namespace == namespace }
-            .filter { category == null || categoryOf(it) == category }
+        listedOrder.mapNotNull { (id, _) ->
+            id.takeIf {
+                (namespace == null || it.namespace == namespace) &&
+                    (category == null || categoryOf(it) == category)
+            }
+        }
 
     /** The file name of a trainer, its folders left out. */
     private fun ResourceLocation.fileName(): String = path.substringAfterLast(PATH_SEPARATOR)

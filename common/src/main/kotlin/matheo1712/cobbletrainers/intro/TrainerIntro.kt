@@ -37,7 +37,7 @@ data class TrainerIntro(
 
     /** The tick the last entrance finishes on, which is when the screen may be skipped. */
     fun entranceEnd(): Int =
-        layers.maxOfOrNull { it.at + it.length }?.coerceIn(0, ticks()) ?: 0
+        layers.maxOfOrNull { it.at.toLong() + it.length }?.coerceIn(0L, ticks().toLong())?.toInt() ?: 0
 
     /** Whether any layer needs the trainer's team sent along - only those cost a lookup. */
     fun needsTeam(): Boolean = layers.any { it.type == IntroLayer.POKEMON && !it.isPlayer }

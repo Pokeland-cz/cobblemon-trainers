@@ -211,8 +211,8 @@ const Preview = (() => {
 
   /** Where a layer comes to rest: its anchor plus its offset. */
   const rest = (layer) => [
-    anchorX(layer.anchor ?? 'center') + (layer.offset ? layer.offset[0] : 0),
-    anchorY(layer.anchor ?? 'center') + (layer.offset ? layer.offset[1] : 0)
+    anchorX(layer.anchor ?? 'center') + (layer.offset?.[0] ?? 0),
+    anchorY(layer.anchor ?? 'center') + (layer.offset?.[1] ?? 0)
   ];
 
   /** The same, as a box - what the stage drags, resizes and snaps to. */
@@ -239,7 +239,18 @@ const Preview = (() => {
 
   /* ---- drawing --------------------------------------------------------- */
 
+  // Keep a few shared layer colours, bounded while an author drags the colour picker.
+  // Replacing an image naturally releases its old tints through the weak key.
+  const tints = new WeakMap();
+  const MAX_TINTS_PER_IMAGE = 8;
   const tinted = (image, color) => {
+    color = color.toUpperCase();
+    let cached = tints.get(image);
+    if (!cached) {
+      cached = new Map();
+      tints.set(image, cached);
+    }
+    if (cached.has(color)) return cached.get(color);
     const buffer = document.createElement('canvas');
     buffer.width = image.width;
     buffer.height = image.height;
@@ -250,6 +261,8 @@ const Preview = (() => {
     ctx.fillRect(0, 0, buffer.width, buffer.height);
     ctx.globalCompositeOperation = 'destination-in';
     ctx.drawImage(image, 0, 0);
+    if (cached.size >= MAX_TINTS_PER_IMAGE) cached.delete(cached.keys().next().value);
+    cached.set(color, buffer);
     return buffer;
   };
 
@@ -498,8 +511,7 @@ const Preview = (() => {
       const over = Math.max(layer.for ?? 12, 1);
       const entrance = layout ? 1 : ease(layer.ease ?? 'out', Math.min(Math.max(since / over, 0), 1));
 
-      const restX = anchorX(layer.anchor ?? 'center') + (layer.offset ? layer.offset[0] : 0);
-      const restY = anchorY(layer.anchor ?? 'center') + (layer.offset ? layer.offset[1] : 0);
+      const [restX, restY] = rest(layer);
       const reach = span(ctx, layer);
 
       let x = restX;

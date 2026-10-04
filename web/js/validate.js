@@ -401,7 +401,8 @@ const Validate = (() => {
     }
 
     if (state.usedKeys) {
-      const missing = state.usedKeys().filter((key) =>
+      const keys = state.usedKeys();
+      const missing = keys.filter((key) =>
         languages.every((code) => !(state.lang[code] || {})[key]));
       if (missing.length) {
         say(found, 'warn',
@@ -409,8 +410,8 @@ const Validate = (() => {
           missing.length + ' translation key(s) with no text: Minecraft will show the key as it is.');
       }
       languages.forEach((code) => {
-        const done = state.usedKeys().filter((key) => (state.lang[code] || {})[key]).length;
-        const total = state.usedKeys().length;
+        const done = keys.filter((key) => (state.lang[code] || {})[key]).length;
+        const total = keys.length;
         if (total && done && done < total) {
           say(found, 'info',
             code + ' : ' + done + ' clé(s) sur ' + total + '. Une clé sans texte retombe sur la clé elle-même, pas sur une autre langue.',

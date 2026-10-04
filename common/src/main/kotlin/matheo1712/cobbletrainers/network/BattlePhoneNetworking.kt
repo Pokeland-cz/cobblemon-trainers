@@ -501,26 +501,12 @@ data class TrainerTeamPayload(
             CustomPacketPayload.codec(
                 { payload, buf ->
                     buf.writeUtf(payload.trainerId)
-                    buf.writeVarInt(payload.members.size)
-                    payload.members.forEach { member ->
-                        buf.writeUtf(member.species)
-                        buf.writeVarInt(member.aspects.size)
-                        member.aspects.forEach { buf.writeUtf(it) }
-                        buf.writeVarInt(member.level)
-                        buf.writeUtf(member.nickname)
-                    }
+                    TrainerTeamCodec.encode(buf, payload.members)
                 },
                 { buf ->
                     TrainerTeamPayload(
                         trainerId = buf.readUtf(),
-                        members = List(buf.readVarInt()) {
-                            TrainerTeamMember(
-                                species = buf.readUtf(),
-                                aspects = List(buf.readVarInt()) { buf.readUtf() },
-                                level = buf.readVarInt(),
-                                nickname = buf.readUtf()
-                            )
-                        }
+                        members = TrainerTeamCodec.decode(buf)
                     )
                 }
             )

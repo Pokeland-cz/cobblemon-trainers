@@ -98,11 +98,20 @@ object ShowdownTeamParser {
      * far more than a listing wants when all it needs is the size of the team. The split is
      * the same one, stopped a step earlier.
      */
-    fun countPokemon(teamEntries: List<String>): Int = blocksOf(teamEntries).size
+    fun countPokemon(teamEntries: List<String>): Int = teamEntries.sumOf { entry ->
+        var count = 0
+        var inBlock = false
+        for (line in entry.lineSequence()) {
+            val nonBlank = line.isNotBlank()
+            if (nonBlank && !inBlock) count++
+            inBlock = nonBlank
+        }
+        count
+    }
 
     /** The Pokémon of a `team` array, one block of Showdown lines each. */
-    private fun blocksOf(teamEntries: List<String>): List<List<String>> =
-        teamEntries.flatMap { splitIntoBlocks(it) }
+    private fun blocksOf(teamEntries: List<String>): Sequence<List<String>> =
+        teamEntries.asSequence().flatMap { splitIntoBlocks(it) }
 
     /**
      * Builds a Pokémon from [properties], filling in the Tera type the pack left unsaid.
@@ -141,7 +150,7 @@ object ShowdownTeamParser {
         val blocks = mutableListOf<List<String>>()
         var current = mutableListOf<String>()
 
-        for (rawLine in showdownText.lines()) {
+        for (rawLine in showdownText.lineSequence()) {
             val line = rawLine.trim()
             if (line.isEmpty()) {
                 if (current.isNotEmpty()) {

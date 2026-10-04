@@ -64,6 +64,7 @@ phrases d'un dresseur par des clés et range les phrases dans la première langu
 ## Y travailler
 
 ```bash
+node --test web/tests/*.test.cjs # tests sans npm, Node.js 22 ou ultérieur
 bash web/sync-assets.sh          # remplit web/assets/ depuis le mod
 python -m http.server 8765 -d web
 ```

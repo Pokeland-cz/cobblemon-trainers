@@ -23,6 +23,18 @@ dependencies {
     mappings(loom.officialMojangMappings())
     modCompileOnly("maven.modrinth:cobblemon:${providers.gradleProperty("cobblemon_version").get()}")
     compileOnly("net.fabricmc:sponge-mixin:${providers.gradleProperty("mixin_version").get()}")
+    testImplementation(kotlin("test-junit"))
+    testImplementation("junit:junit:${providers.gradleProperty("junit_version").get()}")
+}
+
+// Tests exercise mapped game types without starting a loader or a world.
+configurations.testImplementation { extendsFrom(configurations.compileOnly.get()) }
+
+tasks.test {
+    // Minecraft's logging configuration writes relative to the working directory.
+    val runDirectory = layout.buildDirectory.dir("test-run")
+    workingDir(runDirectory)
+    doFirst { runDirectory.get().asFile.mkdirs() }
 }
 
 loom {
