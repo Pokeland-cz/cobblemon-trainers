@@ -7,7 +7,7 @@
   "battle": {
     "level": 80,
     "difficulty": 5,
-    "music": "cobblemon-trainers:battle_music.b2w2_tournament",
+    "music": "cobblemon-trainers:battle_music.ivor",
     "intro": "theazertor",
     "gimmicks": [
       "mega"
