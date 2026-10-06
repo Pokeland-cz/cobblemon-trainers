@@ -2,7 +2,7 @@
 
 Mod Fabric et NeoForge qui ajoute des dresseurs Pokémon configurables à Cobblemon. Chaque dresseur est
 un fichier JSON : une équipe au format Showdown, un skin - celui d'un compte Minecraft ou une
-image livrée par le pack -, des dialogues dans la boîte de Cobblemon, une musique de combat -
+image livrée par le pack, ou un modèle NPC personnalisé -, des dialogues dans la boîte de Cobblemon, une musique de combat -
 et, pour un champion, un écran de versus avant le combat -, et de quoi monter une progression - catégories, conditions à remplir pour être défié,
 advancements à la victoire.
 Les dresseurs se déclarent dans un datapack, donc sans toucher au code.
@@ -430,6 +430,8 @@ sans risque : sans jeton, il écrit ce qu'il aurait envoyé dans `build/mod-publ
   nécessitent un accès réseau et un pseudo existant. En cas d'échec, le dresseur garde le
   skin par défaut et la raison est écrite dans les logs. Le type `texture`, lui, n'a besoin
   de rien d'autre que d'une image dans le pack.
+- Le type de skin `model` sélectionne un modèle NPC Cobblemon dans les ressources client.
+  Un [pack d'exemple avec modèle personnalisé](examples/custom_model/README.md) est fourni.
 - La musique de combat n'est jouée que pour un joueur qui a le mod : c'est son client qui la
   fait tourner, ce qui est aussi ce qui la fait boucler et qui met la musique du jeu en
   attente le temps du combat.

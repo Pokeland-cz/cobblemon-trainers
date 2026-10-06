@@ -27,15 +27,19 @@ const SCHEMA = (() => {
           ['', t('Aucun (Steve)', 'None (Steve)')],
           ['player_username', t('Pseudo de joueur', 'Player username')],
           ['player_uuid', t('UUID de joueur', 'Player UUID')],
-          ['texture', t('Image du pack', 'Pack texture')]
+          ['texture', t('Image du pack', 'Pack texture')],
+          ['model', t('Modèle personnalisé', 'Custom model')]
         ] },
       { k: 'value', t: 'str', def: '', l: t('Valeur', 'Value'),
-        h: t('Un pseudo, un UUID, ou mon_pack:textures/trainers/red.png',
-             'A username, a UUID, or my_pack:textures/trainers/red.png') },
+        h: t('Un pseudo, un UUID, une image (mon_pack:textures/trainers/red.png) ou un modèle NPC (mon_pack:red).',
+             'A username, a UUID, an image (my_pack:textures/trainers/red.png) or an NPC model (my_pack:red).') },
       { k: 'model', t: 'sel', def: 'default', l: t('Gabarit', 'Model'),
         h: t('Seulement pour type: texture - un profil Mojang le dit lui-même.',
              'For type: texture only - a Mojang profile says so itself.'),
-        options: [['default', t('Steve', 'Steve')], ['slim', t('Alex (slim)', 'Alex (slim)')]] }
+        options: [['default', t('Steve', 'Steve')], ['slim', t('Alex (slim)', 'Alex (slim)')]] },
+      { k: 'aspects', t: 'strlist', def: [], l: t('Variantes du modèle', 'Model variants'),
+        h: t('Seulement pour type: model. Aspects du resolver, par exemple winter ; lettres minuscules, chiffres, _ et -. Les assets du modèle doivent être installés côté client.',
+             'For type: model only. Resolver aspects, e.g. winter; lowercase letters, digits, _ and -. Model assets must be installed on the client.') }
     ]
   };
 
@@ -128,7 +132,8 @@ const SCHEMA = (() => {
          'Handed to the winner, and shown on their card before the battle.'),
     fields: [
       { k: 'item', t: 'str', def: '', l: t('Objet', 'Item'),
-        h: t('ID complet, namespace obligatoire.', 'Full id, namespace required.') },
+        h: t('ID complet, avec composants facultatifs comme dans /give : minecraft:diamond[custom_model_data=1]. Quantité dans le champ suivant.',
+             'Full id, with optional components as in /give: minecraft:diamond[custom_model_data=1]. Set the count in the next field.') },
       { k: 'count', t: 'num', def: 1, min: 1, max: 6400, l: t('Quantité', 'Count') },
       { k: 'hidden', t: 'bool', def: false, l: t('Secrète', 'Hidden'),
         h: t('Pas annoncée dans le Battle Phone.', 'Not announced in the Battle Phone.') },
@@ -316,6 +321,8 @@ const SCHEMA = (() => {
       { k: 'tilt', t: 'num', def: 0, l: t('Inclinaison', 'Tilt') }
     ] },
     text: { l: t('Texte', 'Text'), fields: [
+      { k: 'width', t: 'num', def: null, min: 1, l: t('Largeur maximale', 'Maximum width'),
+        h: t('Réduit les textes longs sans déplacer leur centre. Vide = sans limite.', 'Shrinks long text without moving its centre. Empty = unlimited.') },
       { k: 'value', t: 'str', def: '', l: t('Texte', 'Text'),
         h: t('Marques : %name%, %category%, %level%, %team%, %player%.', 'Marks: %name%, %category%, %level%, %team%, %player%.') },
       { k: 'size', t: 'num', def: 1, min: 0.1, step: 0.1, l: t('Taille', 'Size') },

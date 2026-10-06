@@ -204,8 +204,15 @@ val copyExamplePack = tasks.register<Sync>("copyExamplePack") {
 	into(layout.projectDirectory.dir("run/mods/cobblemonrlm"))
 }
 
-tasks.named("runClient") { dependsOn(copyDevMods, copyExamplePack) }
-tasks.named("runServer") { dependsOn(copyDevMods, copyExamplePack) }
+val copyCustomModelExamplePack = tasks.register<Sync>("copyCustomModelExamplePack") {
+	description = "Lays the custom model example into run/mods, for the dev game."
+	group = "fabric"
+	from(rootProject.layout.projectDirectory.dir("examples/custom_model"))
+	into(layout.projectDirectory.dir("run/mods/custom_model"))
+}
+
+tasks.named("runClient") { dependsOn(copyDevMods, copyExamplePack, copyCustomModelExamplePack) }
+tasks.named("runServer") { dependsOn(copyDevMods, copyExamplePack, copyCustomModelExamplePack) }
 
 tasks.processResources {
 	val version = version
@@ -273,6 +280,7 @@ val releaseType = when (providers.gradleProperty("release_type").getOrElse("stab
 // Captured out here on purpose: inside `publishMods`, `version` is the extension's own
 // property, and interpolating it yields its Gradle description rather than the number.
 val modVersion = project.version.toString()
+val publishedVersion = "$modVersion-fabric"
 
 publishMods {
 	// `remapJar`, not `jar`: the latter still carries named mappings and would crash outside a
@@ -282,8 +290,8 @@ publishMods {
 	file = providers.gradleProperty("release_file")
 		.map { rootProject.layout.projectDirectory.file(it) }
 		.orElse(tasks.named<RemapJarTask>("remapJar").flatMap { it.archiveFile })
-	displayName = "$modVersion-fabric"
-	version = modVersion
+	displayName = publishedVersion
+	version = publishedVersion
 	type = releaseType
 	modLoaders.add("fabric")
 

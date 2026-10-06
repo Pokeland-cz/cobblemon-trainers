@@ -53,6 +53,23 @@ d'utiliser ce jar sans le reconstruire. Le script CurseForge accepte le même ch
 `build/mod-publish/curseforge-<loader>.json` (avec `VERSION`, `RELEASE_TYPE` et
 `LOADER=neoforge` pour NeoForge).
 
+## Tests automatisés
+
+`./gradlew :common:test` lance les tests JVM sans monde ni loader. Ils couvrent le comptage
+Showdown, les valeurs par défaut des dresseurs, les zones, la progression NBT, les récompenses,
+les cosmétiques, les intros, les codecs réseau, les multiplicateurs de stats et les bornes
+des modèles. `build` les exécute également ; le rapport est dans
+`common/build/reports/tests/test/index.html`.
+
+`node --test web/tests/*.test.cjs` teste l'éditeur avec Node.js 22 ou ultérieur, sans npm :
+imports/exports, ressources, traductions, validation et calculs d'aperçu. Le stockage et
+l'interface d'archive sont simulés ; la compression ZIP, IndexedDB et le rendu réel du navigateur
+restent à vérifier manuellement. La CI exécute ces tests avant le build et la publication Pages.
+
+Les combats complets, le rendu GPU, l'audio, les mixins et les événements propres aux loaders
+demandent toujours `runClient`/`runServer` sur Fabric et NeoForge. Un test JVM vert ne valide
+pas à lui seul ces intégrations.
+
 ## Frontière entre logique et plateforme
 
 `TrainerPlatform` décrit les opérations du loader : événements serveur, commandes,

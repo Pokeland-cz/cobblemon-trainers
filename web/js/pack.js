@@ -216,11 +216,12 @@ const Pack = (() => {
   /* ---- what lives under assets/ ------------------------------------------ */
 
   /** A name no other asset of the same kind already answers to. */
-  const freeName = (kind, wanted) => {
-    let name = Assets.slug(wanted);
+  const freeName = (kind, wanted, exceptId) => {
+    const base = Assets.slug(wanted);
+    let name = base;
     let n = 2;
-    while (state.assets.some((asset) => asset.kind === kind && asset.name === name)) {
-      name = `${Assets.slug(wanted)}_${n++}`;
+    while (state.assets.some((asset) => asset.id !== exceptId && asset.kind === kind && asset.name === name)) {
+      name = `${base}_${n++}`;
     }
     return name;
   };
@@ -258,7 +259,7 @@ const Pack = (() => {
   const renameAsset = (id, wanted) => {
     const asset = state.assets.find((one) => one.id === id);
     if (!asset) return;
-    asset.name = freeName(asset.kind, wanted);
+    asset.name = freeName(asset.kind, wanted, id);
     changed();
   };
 
@@ -277,8 +278,8 @@ const Pack = (() => {
 
   /** Every key the pack's own files name, in the order they are met. */
   const usedKeys = () => {
-    const found = [];
-    const take = (value) => { if (looksLikeKey(value) && !found.includes(value)) found.push(value); };
+    const found = new Set();
+    const take = (value) => { if (looksLikeKey(value)) found.add(value); };
 
     state.files.forEach((entry) => {
       if (entry.kind === 'trainer') {
@@ -297,7 +298,7 @@ const Pack = (() => {
     state.assets.forEach((asset) => {
       if (asset.subtitle) take(`${state.namespace}.subtitles.${asset.name}`);
     });
-    return found;
+    return [...found];
   };
 
   const languages = () => Object.keys(state.lang);
@@ -388,6 +389,9 @@ const Pack = (() => {
    * versionRange targets the NeoForge line for pack_format 48 (Minecraft 1.21-1.21.1); bump it
    * if the pack ever targets a newer Minecraft version.
    */
+  // TOML basic strings share JSON escapes; DEL must also be escaped in TOML.
+  const tomlString = (value) => JSON.stringify(String(value)).replace(/\u007f/g, '\\u007f');
+
   const neoforgeModsToml = () => { const id = neoforgeModId(); return `modLoader="lowcodefml"
 loaderVersion="[1,)"
 license="All rights reserved"
@@ -396,8 +400,8 @@ issueTrackerURL="https://github.com/matheo-1712/cobblemon-trainers/issues"
 [[mods]]
 modId="${id}"
 version="1.0.0"
-displayName="${state.description || state.namespace}"
-description='''${state.description || state.namespace}'''
+displayName=${tomlString(state.description || state.namespace)}
+description=${tomlString(state.description || state.namespace)}
 
 [[dependencies.${id}]]
     modId="neoforge"
@@ -438,9 +442,10 @@ description='''${state.description || state.namespace}'''
     if (state.packOrder !== '' && Number.isInteger(Number(state.packOrder))) {
       archive.file(`data/${state.namespace}/${ROOT}/trainers/pack.json`, json({ order: Number(state.packOrder) }));
     }
-    if (state.archive === 'jar') archive.file('fabric.mod.json', fabricMod());
-    if (state.archive === 'jar') archive.file('META-INF/neoforge.mods.toml', neoforgeModsToml());
-    if (state.archive === 'jar') archive.file('', fabricMod());
+    if (state.archive === 'jar') {
+      archive.file('fabric.mod.json', fabricMod());
+      archive.file('META-INF/neoforge.mods.toml', neoforgeModsToml());
+    }
 
     state.files.forEach((entry) => archive.file(pathOf(entry), json(entry.doc)));
 

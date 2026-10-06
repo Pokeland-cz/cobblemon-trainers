@@ -393,17 +393,19 @@ class BattleIntroScreen(private val intro: BattleIntroPayload) :
 
     private fun text(guiGraphics: GuiGraphics, layer: IntroLayer, x: Float, y: Float, scale: Float, alpha: Float) {
         val label = resolve(layer.value ?: return)
-        val size = layer.size * uiScale * scale
+        val size = layer.fittedTextSize(font.width(label)) * uiScale * scale
         val pose = guiGraphics.pose()
 
         pose.pushPose()
         pose.translate(x, y, 0f)
         pose.scale(size, size, 1f)
+        // Keep half-pixel precision so odd-width names share the same centre as even-width ones.
+        pose.translate(-font.width(label) / 2f, -font.lineHeight / 2f, 0f)
         guiGraphics.drawString(
             font,
             label,
-            -font.width(label) / 2,
-            -font.lineHeight / 2,
+            0,
+            0,
             argb(alpha, rgb(layer.color, WHITE)),
             layer.shadow
         )

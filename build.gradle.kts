@@ -39,3 +39,11 @@ val exampleDatapack = tasks.register<Zip>("exampleDatapack") {
 	archiveFileName = "exemple_trainer_datapack.zip"
 	destinationDirectory = layout.buildDirectory.dir("dist")
 }
+
+tasks.register<Zip>("customModelExampleDatapack") {
+	description = "Packs the standalone custom NPC model example."
+	group = "build"
+	from("examples/custom_model")
+	archiveFileName = "exemple_custom_model_datapack.zip"
+	destinationDirectory = layout.buildDirectory.dir("dist")
+}

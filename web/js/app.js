@@ -383,7 +383,7 @@ const App = (() => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let image = null;
       if (skin.type === 'texture' && skin.value) image = Preview.texture(skin.value);
-      else if (skin.value) image = Preview.skin(skin.value);
+      else if (skin.type !== 'model' && skin.value) image = Preview.skin(skin.value);
       if (image && image !== 'missing') {
         Preview.drawFlatSkin(ctx, image, skin.model === 'slim', canvas.width / 2, 0, 5);
       } else {
@@ -427,7 +427,7 @@ const App = (() => {
         if (file) wear(await take(file, 'skin'));
       });
     } else {
-      note.textContent = 'crafthead.net';
+      note.textContent = skin.type === 'model' ? skin.value || '' : 'crafthead.net';
     }
     card.appendChild(note);
     return card;
@@ -590,7 +590,7 @@ const App = (() => {
       team: trainer && trainer.doc.team ? trainer.doc.team.length : 6,
       player: preview.player,
       playerSlim: false,
-      trainerSkin: preview.skin || skin.value || '',
+      trainerSkin: preview.skin || (skin.type === 'model' ? '' : skin.value) || '',
       trainerSlim: skin.model === 'slim'
     };
   };
@@ -1712,11 +1712,6 @@ const App = (() => {
     $('lang-en').classList.toggle('on', I18N.lang === 'en');
   };
 
-  const SHIPPED_TEXTURES = ['rays', 'burst', 'slash', 'banner', 'petal', 'shuriken', 'grid',
-    'moon', 'stars', 'scene_manor', 'scene_manor_lights', 'ultra_rift', 'ultra_shard',
-    'crest_rerebleue', 'crest_kagumi', 'crest_griff501', 'crest_octavien29', 'crest_theazertor',
-    'crest_aeliothys'];
-
   /*
    * What every field that names something may be offered, in one place.
    *
@@ -1739,7 +1734,7 @@ const App = (() => {
     skin: () => ({ pack: Pack.references('skin'), mod: [] }),
     texture: () => ({
       pack: Pack.references('intro_texture'),
-      mod: SHIPPED_TEXTURES.map((name) => `cobblemon-trainers:textures/gui/intro/${name}.png`)
+      mod: (typeof SHIPPED !== 'undefined' && SHIPPED.textures) || []
     })
   };
 

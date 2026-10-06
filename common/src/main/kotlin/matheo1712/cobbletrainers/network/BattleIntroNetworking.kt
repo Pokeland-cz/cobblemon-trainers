@@ -143,14 +143,7 @@ data class BattleIntroPayload(
                     buf.writeVarInt(payload.teamSize)
                     buf.writeVarInt(payload.npcId)
                     buf.writeUtf(BattleIntroNetworking.writeScene(payload.scene), MAX_SCENE)
-                    buf.writeVarInt(payload.team.size)
-                    payload.team.forEach { member ->
-                        buf.writeUtf(member.species)
-                        buf.writeVarInt(member.aspects.size)
-                        member.aspects.forEach { buf.writeUtf(it) }
-                        buf.writeVarInt(member.level)
-                        buf.writeUtf(member.nickname)
-                    }
+                    TrainerTeamCodec.encode(buf, payload.team)
                 },
                 { buf ->
                     BattleIntroPayload(
@@ -163,14 +156,7 @@ data class BattleIntroPayload(
                         teamSize = buf.readVarInt(),
                         npcId = buf.readVarInt(),
                         scene = BattleIntroNetworking.readScene(buf.readUtf(MAX_SCENE)),
-                        team = List(buf.readVarInt()) {
-                            TrainerTeamMember(
-                                species = buf.readUtf(),
-                                aspects = List(buf.readVarInt()) { buf.readUtf() },
-                                level = buf.readVarInt(),
-                                nickname = buf.readUtf()
-                            )
-                        }
+                        team = TrainerTeamCodec.decode(buf)
                     )
                 }
             )

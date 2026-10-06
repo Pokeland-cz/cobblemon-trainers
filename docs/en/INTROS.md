@@ -128,6 +128,7 @@ it there. A `text` layer is how you name someone, and it is available for the pl
 | Field | Default | Role |
 | --- | --- | --- |
 | `value` | - | The words, or a translation key |
+| `width` | unlimited | Maximum width in reference pixels, including the shadow; shrinks long text without moving its centre or enlarging short text |
 | `size` | `1` | Scale factor, 1 being the game's own font |
 | `color` | `#FFFFFF` | |
 | `shadow` | `true` | The font's drop shadow |
@@ -227,7 +228,7 @@ needs saying. Any pack may name them: `"intro": "kagumi"` is enough, no namespac
 
 | Intro | Trainer | What it says |
 | --- | --- | --- |
-| `bw` | anything | Blue and red bands, both sides sliding in, a VS that drops |
+| `bw` | anything | Blue and red bands, both sides sliding in, names centred below the figures at the same height, a VS that drops |
 | `rerebleue` | RereBleue | The manor: a night under the moon, lit windows, the mark of the seven witches |
 | `kagumi` | Kagumi | The cherry tree: a blossom in watermark, petals coming down, slow throughout |
 | `griff501` | Griff501 | The frog: he fades in through a blue halo, two shuriken cross, an acid streak |

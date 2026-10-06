@@ -1,5 +1,8 @@
 package matheo1712.cobbletrainers.trainers
 
+import matheo1712.cobbletrainers.CobblemonTrainers
+import net.minecraft.resources.ResourceLocation
+
 /**
  * Skin configuration of a trainer.
  *
@@ -8,15 +11,52 @@ package matheo1712.cobbletrainers.trainers
  * - `"player_uuid"`: uses the skin of the Minecraft player with that UUID.
  * - `"texture"`: uses a player skin image shipped in a pack, under
  *   `assets/<namespace>/<path>` - see [TrainerTextures].
+ * - `"model"`: selects a Cobblemon NPC variation resolver from the client's resource packs.
  *
  * @param type The skin type.
- * @param value The skin value: a username, a UUID, or the resource location of a `.png`
- *   (`cobblemon-trainers:textures/trainers/example.png`).
+ * @param value A username, a UUID, a PNG resource location, or an NPC variation resolver ID
+ *   for the `model` type (for example `my_pack:explorer`).
  * @param model Which player rig wears the texture: `default` (Steve) or `slim` (Alex). Only
  *   read for the `texture` type - Mojang states the model of a player skin itself.
+ * @param aspects Optional model variants. Only read for `model`; internal trainer tags cannot
+ *   be supplied here.
  */
 data class TrainerSkin(
     val type: String = "player_username",
     val value: String = "Steve",
-    val model: String = "default"
-)
+    val model: String = "default",
+    val aspects: List<String> = emptyList()
+) {
+    /** The resolver's name, not the geometry file or an NPC class. */
+    fun modelId(): ResourceLocation? =
+        if (type.equals("model", ignoreCase = true) && ':' in value) ResourceLocation.tryParse(value)
+            ?.takeIf { it.namespace.isNotEmpty() && it.path.isNotEmpty() && !value.startsWith(':') }
+        else null
+
+    fun modelAspects(): Set<String> =
+        if (modelId() == null) emptySet() else aspects.filter { ASPECT.matches(it) }.toSet()
+
+    fun validate(id: ResourceLocation) {
+        if (!type.equals("model", ignoreCase = true)) return
+        if (modelId() == null) {
+            CobblemonTrainers.LOGGER.warn(
+                "Trainer {}: skin model '{}' must be a namespaced NPC resolver ID; using the default skin.",
+                id, value
+            )
+        }
+        for (aspect in aspects) {
+            if (!ASPECT.matches(aspect)) {
+                CobblemonTrainers.LOGGER.warn(
+                    "Trainer {}: ignoring skin aspect '{}'; use lowercase letters, digits, underscores or hyphens.",
+                    id, aspect
+                )
+            }
+        }
+    }
+
+    companion object {
+        // Colons are deliberately excluded: trainer_id:, trainer_spawner: and trinket tags
+        // belong to the mod, never to a model's visual variants.
+        private val ASPECT = Regex("[a-z0-9][a-z0-9_-]*")
+    }
+}

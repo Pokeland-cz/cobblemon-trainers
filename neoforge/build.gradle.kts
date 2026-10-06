@@ -56,12 +56,13 @@ tasks.matching { it.name == "runClient" || it.name == "runServer" }.configureEac
 }
 
 val modVersion = project.version.toString()
+val publishedVersion = "$modVersion-neoforge"
 publishMods {
     file = providers.gradleProperty("release_file")
         .map { rootProject.layout.projectDirectory.file(it) }
         .orElse(tasks.jar.flatMap { it.archiveFile })
-    displayName = "$modVersion-neoforge"
-    version = "$modVersion-neoforge"
+    displayName = publishedVersion
+    version = publishedVersion
     type = when (providers.gradleProperty("release_type").getOrElse("stable").lowercase()) {
         "alpha" -> ReleaseType.ALPHA
         "beta" -> ReleaseType.BETA

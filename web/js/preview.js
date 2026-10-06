@@ -144,6 +144,12 @@ const Preview = (() => {
 
   const font = (size) => Math.round(9 * size) + 'px "Jersey 10", "Minecraftia", monospace';
 
+  const textFit = (ctx, layer, value) => {
+    const size = layer.size ?? 1;
+    const width = textWidth(ctx, value, size) + (layer.shadow === false ? 0 : size);
+    return layer.width > 0 && width > 0 ? Math.min(1, layer.width / width) : 1;
+  };
+
   const span = (ctx, layer) => {
     switch (layer.type) {
       case 'figure': return layer.height ?? 96;
@@ -180,7 +186,8 @@ const Preview = (() => {
       case 'text': {
         const size = layer.size ?? 1;
         const value = resolve(layer.value, about || {});
-        return [Math.max(textWidth(ctx, value, size), 6), Math.max(10 * size, 6)];
+        const fit = textFit(ctx, layer, value);
+        return [Math.max(textWidth(ctx, value, size) * fit, 6), Math.max(10 * size * fit, 6)];
       }
       case 'vs': {
         const size = layer.size ?? 1;
@@ -211,8 +218,8 @@ const Preview = (() => {
 
   /** Where a layer comes to rest: its anchor plus its offset. */
   const rest = (layer) => [
-    anchorX(layer.anchor ?? 'center') + (layer.offset ? layer.offset[0] : 0),
-    anchorY(layer.anchor ?? 'center') + (layer.offset ? layer.offset[1] : 0)
+    anchorX(layer.anchor ?? 'center') + (layer.offset?.[0] ?? 0),
+    anchorY(layer.anchor ?? 'center') + (layer.offset?.[1] ?? 0)
   ];
 
   /** The same, as a box - what the stage drags, resizes and snaps to. */
@@ -239,7 +246,18 @@ const Preview = (() => {
 
   /* ---- drawing --------------------------------------------------------- */
 
+  // Keep a few shared layer colours, bounded while an author drags the colour picker.
+  // Replacing an image naturally releases its old tints through the weak key.
+  const tints = new WeakMap();
+  const MAX_TINTS_PER_IMAGE = 8;
   const tinted = (image, color) => {
+    color = color.toUpperCase();
+    let cached = tints.get(image);
+    if (!cached) {
+      cached = new Map();
+      tints.set(image, cached);
+    }
+    if (cached.has(color)) return cached.get(color);
     const buffer = document.createElement('canvas');
     buffer.width = image.width;
     buffer.height = image.height;
@@ -250,6 +268,8 @@ const Preview = (() => {
     ctx.fillRect(0, 0, buffer.width, buffer.height);
     ctx.globalCompositeOperation = 'destination-in';
     ctx.drawImage(image, 0, 0);
+    if (cached.size >= MAX_TINTS_PER_IMAGE) cached.delete(cached.keys().next().value);
+    cached.set(color, buffer);
     return buffer;
   };
 
@@ -347,15 +367,19 @@ const Preview = (() => {
       if (!value) return;
       ctx.save();
       ctx.globalAlpha = alpha;
-      ctx.font = font((layer.size ?? 1) * scale);
+      const size = layer.size ?? 1;
+      const fittedScale = scale * textFit(ctx, layer, value);
+      ctx.translate(x, y);
+      ctx.scale(fittedScale, fittedScale);
+      ctx.font = font(size);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       if (layer.shadow !== false) {
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
-        ctx.fillText(value, x + 1.5 * scale, y + 1.5 * scale);
+        ctx.fillText(value, size, size);
       }
       ctx.fillStyle = rgb(layer.color, '#FFFFFF');
-      ctx.fillText(value, x, y);
+      ctx.fillText(value, 0, 0);
       ctx.restore();
     },
 
@@ -498,8 +522,7 @@ const Preview = (() => {
       const over = Math.max(layer.for ?? 12, 1);
       const entrance = layout ? 1 : ease(layer.ease ?? 'out', Math.min(Math.max(since / over, 0), 1));
 
-      const restX = anchorX(layer.anchor ?? 'center') + (layer.offset ? layer.offset[0] : 0);
-      const restY = anchorY(layer.anchor ?? 'center') + (layer.offset ? layer.offset[1] : 0);
+      const [restX, restY] = rest(layer);
       const reach = span(ctx, layer);
 
       let x = restX;

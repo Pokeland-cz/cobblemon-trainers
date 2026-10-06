@@ -15,7 +15,7 @@ import java.util.UUID
 /**
  * Remembers which players have already defeated which trainers, so a trainer can refuse a
  * rematch ([TrainerProgressRules.rematch]) and hand out its rewards only once
- * ([TrainerProgressRules.rewards]).
+ * ([TrainerReward.firstWinOnly]).
  *
  * Trainers are keyed by their **datapack ID**, not by the UUID of the spawned entity: beating
  * `mon_pack:champion` beats that trainer, wherever and however many times it stands in the
@@ -38,7 +38,7 @@ class TrainerProgress : SavedData() {
      * This is what a counting requirement or advancement criterion is scored on.
      */
     fun defeatedTrainersOf(player: UUID): Set<ResourceLocation> =
-        defeatedBy.filterValues { player in it }.keys
+        defeatedBy.entries.asSequence().filter { player in it.value }.map { it.key }.toSet()
 
     /**
      * Records a victory.
@@ -96,7 +96,7 @@ class TrainerProgress : SavedData() {
         fun of(server: MinecraftServer): TrainerProgress =
             server.overworld().dataStorage.computeIfAbsent(FACTORY, FILE_NAME)
 
-        private fun load(tag: CompoundTag): TrainerProgress {
+        internal fun load(tag: CompoundTag): TrainerProgress {
             val progress = TrainerProgress()
             val entries = tag.getCompound(DEFEATED_KEY)
 

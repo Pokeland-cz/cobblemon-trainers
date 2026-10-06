@@ -507,7 +507,8 @@ class BattlePhoneScreen(data: OpenBattlePhonePayload) :
 
     /** Builds a detached Cobblemon NPC with the received skin for a consistent 3D preview. */
     private fun trainerPreview(entry: BattlePhoneEntry, skin: TrainerSkinCache.Skin): NPCEntity? {
-        val bytes = skin.bytes ?: return null
+        val bytes = skin.bytes
+        if (bytes == null && skin.modelResource == null) return null
         if (previewOwner == entry.id && previewSkin === skin) return previewEntity
         val level = minecraft?.level ?: return null
         val npcClass = NPCClasses.getByIdentifier(TrainerSpawner.NPC_CLASS_HEALING) ?: return null
@@ -516,18 +517,21 @@ class BattlePhoneScreen(data: OpenBattlePhonePayload) :
         npc.npc = npcClass
         // The NPC class setter copies RESOURCE_IDENTIFIER only on the server. A local preview
         // must select it explicitly, otherwise it keeps the constructor's first NPC model.
-        npc.forcedResourceIdentifier = npcClass.resourceIdentifier
+        npc.forcedResourceIdentifier = skin.modelResource ?: npcClass.resourceIdentifier
         npc.hideNameTag = true
         npc.entityData.set(NPCEntity.LEVEL, entry.level)
         npc.appliedAspects.add(CobblemonTrainers.TRAINER_ASPECT_PREFIX + entry.id)
         npc.appliedAspects.removeIf { it == "model-default" || it == "model-slim" }
-        npc.appliedAspects.add(if (skin.slim) "model-slim" else "model-default")
+        if (skin.modelResource != null) npc.appliedAspects.addAll(skin.aspects)
+        else npc.appliedAspects.add(if (skin.slim) "model-slim" else "model-default")
         TrainerOutfit.dress(npc, entry.cosmetics)
         npc.updateAspects()
-        npc.entityData.set(
-            NPCEntity.NPC_PLAYER_TEXTURE,
-            NPCPlayerTexture(bytes.copyOf(), if (skin.slim) NPCPlayerModelType.SLIM else NPCPlayerModelType.DEFAULT)
-        )
+        if (bytes != null) {
+            npc.entityData.set(
+                NPCEntity.NPC_PLAYER_TEXTURE,
+                NPCPlayerTexture(bytes.copyOf(), if (skin.slim) NPCPlayerModelType.SLIM else NPCPlayerModelType.DEFAULT)
+            )
+        }
         previewOwner = entry.id
         previewSkin = skin
         previewEntity = npc

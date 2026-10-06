@@ -40,8 +40,16 @@ jobs:
       - name: checkout repository
         uses: actions/checkout@v6
 
+      - name: setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
       - name: fill web/assets from the mod
         run: bash web/sync-assets.sh
+
+      - name: test web editor
+        run: node --test web/tests/*.test.cjs
 
       - name: configure pages
         uses: actions/configure-pages@v5

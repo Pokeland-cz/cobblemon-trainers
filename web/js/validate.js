@@ -49,8 +49,24 @@ const Validate = (() => {
     }
     if (skin.model && skin.type && skin.type !== 'texture') {
       say(found, 'info',
-        'Le gabarit n’est lu que pour un skin texture : un profil Mojang le dit lui-même.',
-        'The model is only read for a texture skin: a Mojang profile says so itself.');
+        'Le gabarit n’est lu que pour un skin texture ; un modèle personnalisé utilise son resolver.',
+        'The rig is only read for a texture skin; a custom model uses its resolver.');
+    }
+    if (skin.type === 'model') {
+      if (skin.value && !NAMESPACED.test(skin.value)) {
+        say(found, 'error',
+          'Un modèle NPC se nomme mon_pack:red : utilise le name du resolver, pas le chemin du .geo.json.',
+          'An NPC model is named my_pack:red: use the resolver name, not the .geo.json path.');
+      }
+      if (!Array.isArray(skin.aspects || []) || (skin.aspects || []).some(aspect =>
+          typeof aspect !== 'string' || !/^[a-z0-9][a-z0-9_-]*$/.test(aspect))) {
+        say(found, 'error',
+          'Les aspects sont une liste de mots en minuscules, chiffres, _ et - ; les tags internes avec : sont interdits.',
+          'Aspects are a list of lowercase words, digits, _ and -; internal tags containing : are forbidden.');
+      }
+      say(found, 'info',
+        'Modèle personnalisé : installe ses assets dans un resource pack côté client. L’aperçu 3D est disponible en jeu.',
+        'Custom model: install its assets in a client resource pack. The 3D preview is available in game.');
     }
 
     const battle = doc.battle || {};
@@ -113,7 +129,9 @@ const Validate = (() => {
     }
 
     (doc.rewards || []).forEach((reward, index) => {
-      if (!reward.item || !NAMESPACED.test(reward.item)) {
+      // Component values belong to Minecraft's parser; only check the item ID here.
+      const itemId = typeof reward.item === 'string' ? reward.item.trim().split('[', 1)[0] : '';
+      if (!NAMESPACED.test(itemId)) {
         say(found, 'error',
           'Récompense #' + (index + 1) + ' : il faut un ID complet, namespace obligatoire.',
           'Reward #' + (index + 1) + ': a full id is required, namespace included.');
@@ -383,7 +401,8 @@ const Validate = (() => {
     }
 
     if (state.usedKeys) {
-      const missing = state.usedKeys().filter((key) =>
+      const keys = state.usedKeys();
+      const missing = keys.filter((key) =>
         languages.every((code) => !(state.lang[code] || {})[key]));
       if (missing.length) {
         say(found, 'warn',
@@ -391,8 +410,8 @@ const Validate = (() => {
           missing.length + ' translation key(s) with no text: Minecraft will show the key as it is.');
       }
       languages.forEach((code) => {
-        const done = state.usedKeys().filter((key) => (state.lang[code] || {})[key]).length;
-        const total = state.usedKeys().length;
+        const done = keys.filter((key) => (state.lang[code] || {})[key]).length;
+        const total = keys.length;
         if (total && done && done < total) {
           say(found, 'info',
             code + ' : ' + done + ' clé(s) sur ' + total + '. Une clé sans texte retombe sur la clé elle-même, pas sur une autre langue.',

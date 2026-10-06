@@ -37,7 +37,7 @@ data class TrainerIntro(
 
     /** The tick the last entrance finishes on, which is when the screen may be skipped. */
     fun entranceEnd(): Int =
-        layers.maxOfOrNull { it.at + it.length }?.coerceIn(0, ticks()) ?: 0
+        layers.maxOfOrNull { it.at.toLong() + it.length }?.coerceIn(0L, ticks().toLong())?.toInt() ?: 0
 
     /** Whether any layer needs the trainer's team sent along - only those cost a lookup. */
     fun needsTeam(): Boolean = layers.any { it.type == IntroLayer.POKEMON && !it.isPlayer }
@@ -96,7 +96,8 @@ data class TrainerIntro(
  * @param sound Played once, when the entrance starts. A UI sound, so it rides the *Master*
  *   slider rather than the music one the battle theme is on.
  * @param who Whose figure, or whose team: `trainer` or `player`.
- * @param width Width in reference pixels. A `fill` without one spans the screen.
+ * @param width Width in reference pixels. A `fill` without one spans the screen; a `text`
+ *   with a positive width shrinks to fit, including its shadow, without moving its centre.
  * @param height Height in reference pixels: how tall a model stands, how thick a band is.
  * @param color `#RRGGBB`. What it colours depends on the type - a fill, a text, an image tint.
  * @param slant How far a `fill` leans over its own height. 0 is a rectangle.
@@ -148,6 +149,13 @@ data class IntroLayer(
 
     val offsetX: Int get() = offset.getOrElse(0) { 0 }
     val offsetY: Int get() = offset.getOrElse(1) { 0 }
+
+    /** Fit the resolved text, never enlarging a short name to fill its allotted space. */
+    fun fittedTextSize(textWidth: Int): Float {
+        val limit = width?.takeIf { it > 0 } ?: return size
+        val pixels = textWidth + if (shadow) 1 else 0
+        return if (pixels > 0) minOf(size, limit.toFloat() / pixels) else size
+    }
 
     /** Whether this layer is the player's rather than the trainer's. */
     val isPlayer: Boolean get() = who.equals(PLAYER, ignoreCase = true)
