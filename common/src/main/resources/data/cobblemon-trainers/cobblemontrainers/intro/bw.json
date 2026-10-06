@@ -48,7 +48,7 @@
       "height": 178,
       "yaw": 22,
       "offset": [
-        -263,
+        -248,
         1
       ],
       "from": "left",
@@ -60,7 +60,7 @@
       "height": 178,
       "yaw": -22,
       "offset": [
-        263,
+        248,
         1
       ],
       "from": "right",
@@ -70,25 +70,27 @@
       "type": "text",
       "value": "%player%",
       "offset": [
-        -247,
-        128
+        -248,
+        112
       ],
       "at": 18,
       "for": 6,
       "from": "fade",
-      "size": 2
+      "size": 1.5,
+      "width": 112
     },
     {
       "type": "text",
       "value": "%name%",
       "offset": [
-        265,
-        128
+        248,
+        112
       ],
       "at": 18,
       "for": 6,
       "from": "fade",
-      "size": 2
+      "size": 1.5,
+      "width": 112
     },
     {
       "type": "team_balls",

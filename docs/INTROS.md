@@ -129,6 +129,7 @@ est la façon de nommer quelqu'un, et il est aussi disponible pour le joueur.
 | Champ | Défaut | Rôle |
 | --- | --- | --- |
 | `value` | - | Le texte, ou une clé de traduction |
+| `width` | sans limite | Largeur maximale en pixels de référence, ombre comprise ; réduit les textes longs sans déplacer leur centre ni agrandir les textes courts |
 | `size` | `1` | Facteur d'échelle, 1 étant la police du jeu |
 | `color` | `#FFFFFF` | |
 | `shadow` | `true` | L'ombre portée de la police |
@@ -229,7 +230,7 @@ suffit, sans namespace.
 
 | Intro | Dresseur | Ce qu'elle raconte |
 | --- | --- | --- |
-| `bw` | à tout faire | Bandes bleue et rouge, glissement des deux côtés, VS qui tombe |
+| `bw` | à tout faire | Bandes bleue et rouge, glissement des deux côtés, noms centrés sous les personnages à la même hauteur, VS qui tombe |
 | `rerebleue` | RereBleue | Le manoir : une nuit sous la lune, les fenêtres allumées, la marque des sept sorcières |
 | `kagumi` | Kagumi | Le cerisier : une fleur en filigrane, des pétales qui tombent, tout en lenteur |
 | `griff501` | Griff501 | La grenouille : il se matérialise dans un halo bleu, deux shuriken passent, éclair acide |

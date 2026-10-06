@@ -5,6 +5,18 @@ import net.minecraft.resources.ResourceLocation
 import kotlin.test.*
 
 class TrainerIntroTest {
+    @Test fun `name fitting preserves short names and fits long names including shadows`() {
+        val layer = IntroLayer(type = "text", size = 1.5f, width = 112)
+        assertEquals(1.5f, layer.fittedTextSize(42))
+        for (pixels in listOf(96, 192, 500)) {
+            assertTrue(layer.fittedTextSize(pixels) * (pixels + 1) <= 112.001f)
+        }
+        assertEquals(1.5f, layer.fittedTextSize(0))
+        assertEquals(1.5f, layer.copy(width = null).fittedTextSize(500))
+        assertEquals(1.5f, layer.copy(width = 0).fittedTextSize(500))
+        assertEquals(112f / 192, layer.copy(shadow = false).fittedTextSize(192))
+    }
+
     @Test fun `partial JSON retains defaults and maps the for field`() {
         val scene = Gson().fromJson("""{"layers":[{"type":"text","at":3,"for":7}]}""", TrainerIntro::class.java)
         assertEquals(100, scene.ticks())
