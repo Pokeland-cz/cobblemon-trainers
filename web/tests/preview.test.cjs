@@ -27,6 +27,19 @@ test('missing offset coordinates default to zero like the game renderer', () => 
   assert.deepEqual(plain(Preview.rest({ anchor: 'bottom-left', offset: [10, -20] })), [10, 340]);
 });
 
+test('unequal names stay centred and long names fit equal width limits', () => {
+  const { Preview, canvas } = preview();
+  const ctx = canvas.getContext('2d');
+  const layer = { type: 'text', size: 1.5, width: 112, value: '%name%' };
+  const short = Preview.extent(ctx, layer, { name: 'Alex' });
+  const long = Preview.extent(ctx, layer, { name: 'A very long trainer name' });
+  assert.equal(short[1], 15);
+  assert.ok(long[0] <= 112);
+  assert.ok(long[1] < short[1]);
+  assert.deepEqual(plain(Preview.rest({ ...layer, offset: [-248, 112] })), [72, 292]);
+  assert.deepEqual(plain(Preview.rest({ ...layer, offset: [248, 112] })), [568, 292]);
+});
+
 test('stable depth order keeps file order for ties without mutating layers', () => {
   const { Preview } = preview();
   const layers = [{ z: 2 }, {}, { z: 2 }, { z: -1 }];

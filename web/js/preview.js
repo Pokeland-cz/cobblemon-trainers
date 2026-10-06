@@ -144,6 +144,12 @@ const Preview = (() => {
 
   const font = (size) => Math.round(9 * size) + 'px "Jersey 10", "Minecraftia", monospace';
 
+  const textFit = (ctx, layer, value) => {
+    const size = layer.size ?? 1;
+    const width = textWidth(ctx, value, size) + (layer.shadow === false ? 0 : size);
+    return layer.width > 0 && width > 0 ? Math.min(1, layer.width / width) : 1;
+  };
+
   const span = (ctx, layer) => {
     switch (layer.type) {
       case 'figure': return layer.height ?? 96;
@@ -180,7 +186,8 @@ const Preview = (() => {
       case 'text': {
         const size = layer.size ?? 1;
         const value = resolve(layer.value, about || {});
-        return [Math.max(textWidth(ctx, value, size), 6), Math.max(10 * size, 6)];
+        const fit = textFit(ctx, layer, value);
+        return [Math.max(textWidth(ctx, value, size) * fit, 6), Math.max(10 * size * fit, 6)];
       }
       case 'vs': {
         const size = layer.size ?? 1;
@@ -360,15 +367,19 @@ const Preview = (() => {
       if (!value) return;
       ctx.save();
       ctx.globalAlpha = alpha;
-      ctx.font = font((layer.size ?? 1) * scale);
+      const size = layer.size ?? 1;
+      const fittedScale = scale * textFit(ctx, layer, value);
+      ctx.translate(x, y);
+      ctx.scale(fittedScale, fittedScale);
+      ctx.font = font(size);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       if (layer.shadow !== false) {
         ctx.fillStyle = 'rgba(0,0,0,0.55)';
-        ctx.fillText(value, x + 1.5 * scale, y + 1.5 * scale);
+        ctx.fillText(value, size, size);
       }
       ctx.fillStyle = rgb(layer.color, '#FFFFFF');
-      ctx.fillText(value, x, y);
+      ctx.fillText(value, 0, 0);
       ctx.restore();
     },
 

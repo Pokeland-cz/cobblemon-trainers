@@ -321,6 +321,8 @@ const SCHEMA = (() => {
       { k: 'tilt', t: 'num', def: 0, l: t('Inclinaison', 'Tilt') }
     ] },
     text: { l: t('Texte', 'Text'), fields: [
+      { k: 'width', t: 'num', def: null, min: 1, l: t('Largeur maximale', 'Maximum width'),
+        h: t('Réduit les textes longs sans déplacer leur centre. Vide = sans limite.', 'Shrinks long text without moving its centre. Empty = unlimited.') },
       { k: 'value', t: 'str', def: '', l: t('Texte', 'Text'),
         h: t('Marques : %name%, %category%, %level%, %team%, %player%.', 'Marks: %name%, %category%, %level%, %team%, %player%.') },
       { k: 'size', t: 'num', def: 1, min: 0.1, step: 0.1, l: t('Taille', 'Size') },
