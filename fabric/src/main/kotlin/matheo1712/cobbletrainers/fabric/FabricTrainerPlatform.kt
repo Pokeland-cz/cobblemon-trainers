@@ -62,7 +62,15 @@ class FabricTrainerPlatform : TrainerPlatform {
         ServerLivingEntityEvents.AFTER_DEATH.register { entity, source -> handler(entity, source) }
     }
     override fun onDisconnect(handler: (ServerPlayer) -> Unit) {
-        ServerPlayConnectionEvents.DISCONNECT.register { connection, _ -> handler(connection.player) }
+        // Fabric fires this from the Netty thread when the connection drops on its own
+        // (`Connection.channelInactive`), not only from the server thread. Every handler touches
+        // the world or server-thread state - TrainerCalls discards an entity - so it is moved
+        // over. `execute` runs inline when already on the server thread, which keeps the
+        // shutdown path (players removed before the worlds are saved) unchanged.
+        ServerPlayConnectionEvents.DISCONNECT.register { connection, server ->
+            val player = connection.player
+            server.execute { handler(player) }
+        }
     }
     override fun <T : Any> register(registry: Registry<T>, id: ResourceLocation, value: T) {
         Registry.register(registry, id, value)
